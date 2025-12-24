@@ -2,10 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [rel/prod]
     tags: ['v*']
   pull_request:
-    branches: [main]
+    branches: [rel/prod]
 
 env:
   DOTNET_NOLOGO: true
