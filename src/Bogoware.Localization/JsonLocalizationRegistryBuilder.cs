@@ -5,19 +5,19 @@ using Microsoft.Extensions.Logging;
 namespace Bogoware.Localization;
 
 /// <summary>
-/// Builder for <see cref="JsonLocalizedMessageRegistry"/> with assembly scanning,
+/// Builder for <see cref="JsonLocalizationRegistry"/> with assembly scanning,
 /// file loading, and duplicate-override logging.
 /// </summary>
-public class JsonLocalizedMessageRegistryBuilder(ILogger? logger = null)
+public class JsonLocalizationRegistryBuilder(ILogger? logger = null)
 {
     private static readonly string[] DefaultPatterns = ["localized-messages", "error-messages"];
-    private readonly JsonLocalizedMessageRegistry _registry = new();
+    private readonly JsonLocalizationRegistry _registry = new();
 
     /// <summary>
     /// Scans embedded resources in the given assembly for JSON files matching the provided patterns
     /// (defaults to <c>["localized-messages", "error-messages"]</c>).
     /// </summary>
-    public JsonLocalizedMessageRegistryBuilder AddFromAssemblyResources(Assembly assembly, params string[] patterns)
+    public JsonLocalizationRegistryBuilder AddFromAssemblyResources(Assembly assembly, params string[] patterns)
     {
         var effectivePatterns = patterns.Length > 0 ? patterns : DefaultPatterns;
 
@@ -49,7 +49,7 @@ public class JsonLocalizedMessageRegistryBuilder(ILogger? logger = null)
     /// <summary>
     /// Loads a JSON file from the filesystem for the specified culture.
     /// </summary>
-    public JsonLocalizedMessageRegistryBuilder AddFromFile(string path, CultureInfo culture)
+    public JsonLocalizationRegistryBuilder AddFromFile(string path, CultureInfo culture)
     {
         var json = File.ReadAllText(path);
         logger?.LogDebug("Loading localization from file {Path} for culture '{Culture}'", path, culture.Name);
@@ -61,7 +61,7 @@ public class JsonLocalizedMessageRegistryBuilder(ILogger? logger = null)
     /// Scans all loaded assemblies in the current AppDomain matching the given name prefixes.
     /// Assemblies are topologically sorted (dependencies first, dependents override).
     /// </summary>
-    public JsonLocalizedMessageRegistryBuilder AddFromLoadedAssemblies(params string[] prefixes)
+    public JsonLocalizationRegistryBuilder AddFromLoadedAssemblies(params string[] prefixes)
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies()
             .Where(a => prefixes.Any(p => a.GetName().Name?.StartsWith(p, StringComparison.Ordinal) == true))
@@ -77,7 +77,7 @@ public class JsonLocalizedMessageRegistryBuilder(ILogger? logger = null)
     /// <summary>
     /// Loads resources from the given assemblies in order (latter overrides earlier).
     /// </summary>
-    public JsonLocalizedMessageRegistryBuilder AddFromAssemblies(IEnumerable<Assembly> assemblies, params string[] patterns)
+    public JsonLocalizationRegistryBuilder AddFromAssemblies(IEnumerable<Assembly> assemblies, params string[] patterns)
     {
         foreach (var assembly in assemblies)
             AddFromAssemblyResources(assembly, patterns);
@@ -86,9 +86,9 @@ public class JsonLocalizedMessageRegistryBuilder(ILogger? logger = null)
     }
 
     /// <summary>
-    /// Builds the <see cref="JsonLocalizedMessageRegistry"/> with all loaded templates.
+    /// Builds the <see cref="JsonLocalizationRegistry"/> with all loaded templates.
     /// </summary>
-    public JsonLocalizedMessageRegistry Build() => _registry;
+    public JsonLocalizationRegistry Build() => _registry;
 
     private static string ExtractCulture(string resourceName)
     {

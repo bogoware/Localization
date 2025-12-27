@@ -26,7 +26,7 @@ dotnet add package Bogoware.Localization
 using Bogoware.Localization;
 
 // Marker interface — opt-in for localization
-public class RequiredFieldError(string fieldName) : ILocalizableString
+public class RequiredFieldError(string fieldName) : ILocalizable
 {
     public string FieldName { get; } = fieldName;
 }
@@ -57,7 +57,7 @@ services.AddLocalization(typeof(RequiredFieldError).Assembly);
 ### 4. Format
 
 ```csharp
-var formatter = serviceProvider.GetRequiredService<ILocalizedMessageFormatter>();
+var formatter = serviceProvider.GetRequiredService<ILocalizationFormatter>();
 var error = new RequiredFieldError("Email");
 
 // Uses CultureInfo.CurrentUICulture by default
@@ -70,10 +70,10 @@ var message = formatter.Format(error);
 
 The formatter resolves localized strings in this order:
 
-1. **Self-provider** — if the type implements `ILocalizableStringProvider`, calls `Localize(culture)`
-2. **DI provider** — if an `ILocalizableStringProvider<T>` is registered in the container
-3. **Registry template** — looks up `Type.FullName` in the `ILocalizedMessageRegistry`
-4. **Fallback message** — if the type extends `LocalizedMessage`, uses `FallbackMessage`
+1. **Self-provider** — if the type implements `ILocalizationProvider`, calls `Localize(culture)`
+2. **DI provider** — if an `ILocalizationProvider<T>` is registered in the container
+3. **Registry template** — looks up `Type.FullName` in the `ILocalizationRegistry`
+4. **Fallback message** — uses the default fallback format
 5. **Default fallback** — `TypeName(Prop1=val1, Prop2=val2)`
 
 ## License

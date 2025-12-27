@@ -3,24 +3,24 @@ using System.Globalization;
 namespace Bogoware.Localization.Tests.Helpers;
 
 /// <summary>
-/// Simple marker type implementing ILocalizableString for testing.
+/// Simple marker type implementing ILocalizable for testing.
 /// </summary>
-public class TestLocalizableString : ILocalizableString;
+public class TestLocalizable : ILocalizable;
 
 /// <summary>
-/// Self-localizing type for testing ILocalizableStringProvider.
+/// Self-localizing type for testing ILocalizableProvider.
 /// </summary>
-public class TestSelfProvider(string value) : ILocalizableStringProvider
+public class TestSelfProvider(string value) : ILocalizationProvider
 {
     public string Localize(CultureInfo? culture = null) => value;
 }
 
 /// <summary>
-/// DI provider for TestLocalizableString.
+/// DI provider for TestLocalizable.
 /// </summary>
-public class TestDiProvider : ILocalizableStringProvider<TestLocalizableString>
+public class TestDiProvider : ILocalizationProvider<TestLocalizable>
 {
-    public string Localize(TestLocalizableString value, CultureInfo? culture = null) => "from DI provider";
+    public string Localize(TestLocalizable value, CultureInfo? culture = null) => "from DI provider";
 }
 
 
@@ -28,7 +28,7 @@ public class TestDiProvider : ILocalizableStringProvider<TestLocalizableString>
 /// Simulates a validation error with a FieldName property for template substitution tests.
 /// Template placeholder: {FieldName}
 /// </summary>
-public class TestRequiredFieldError(string fieldName) : ILocalizableString
+public class TestRequiredFieldError(string fieldName) : ILocalizable
 {
     public string FieldName { get; } = fieldName;
 }
@@ -37,7 +37,7 @@ public class TestRequiredFieldError(string fieldName) : ILocalizableString
 /// Simulates a validation error with FieldName and MaxLength properties.
 /// Template placeholders: {FieldName}, {MaxLength}
 /// </summary>
-public class TestMaxLengthError(string fieldName, int maxLength) : ILocalizableString
+public class TestMaxLengthError(string fieldName, int maxLength) : ILocalizable
 {
     public string FieldName { get; } = fieldName;
     public int MaxLength { get; } = maxLength;
@@ -47,7 +47,7 @@ public class TestMaxLengthError(string fieldName, int maxLength) : ILocalizableS
 /// Simulates a validation error with FieldName, Min, and Max properties.
 /// Template placeholders: {FieldName}, {Min}, {Max}
 /// </summary>
-public class TestOutOfRangeError(string fieldName, object? fieldValue, object min, object max) : ILocalizableString
+public class TestOutOfRangeError(string fieldName, object? fieldValue, object min, object max) : ILocalizable
 {
     public string FieldName { get; } = fieldName;
     public object? FieldValue { get; } = fieldValue;
@@ -59,7 +59,7 @@ public class TestOutOfRangeError(string fieldName, object? fieldValue, object mi
 /// Simulates a validation error with FieldName and Min properties.
 /// Template placeholders: {FieldName}, {Min}
 /// </summary>
-public class TestMustBeGreaterThanError(string fieldName, object min) : ILocalizableString
+public class TestMustBeGreaterThanError(string fieldName, object min) : ILocalizable
 {
     public string FieldName { get; } = fieldName;
     public object Min { get; } = min;
@@ -69,7 +69,7 @@ public class TestMustBeGreaterThanError(string fieldName, object min) : ILocaliz
 /// Simulates a validation error with FieldName and ExpectedFormat properties.
 /// Template placeholders: {FieldName}, {ExpectedFormat}
 /// </summary>
-public class TestInvalidFormatError(string fieldName, string expectedFormat) : ILocalizableString
+public class TestInvalidFormatError(string fieldName, string expectedFormat) : ILocalizable
 {
     public string FieldName { get; } = fieldName;
     public string ExpectedFormat { get; } = expectedFormat;
@@ -79,7 +79,7 @@ public class TestInvalidFormatError(string fieldName, string expectedFormat) : I
 /// Simulates a simple validation error with only FieldName (for email, fiscal code, etc.).
 /// Template placeholder: {FieldName}
 /// </summary>
-public class TestInvalidEmailError(string fieldName) : ILocalizableString
+public class TestInvalidEmailError(string fieldName) : ILocalizable
 {
     public string FieldName { get; } = fieldName;
 }
@@ -88,7 +88,7 @@ public class TestInvalidEmailError(string fieldName) : ILocalizableString
 /// Simulates a type with declared-only property for BuildFallback test.
 /// Has a FieldName inherited-style property excluded from DeclaredOnly, and MaxLength as its own property.
 /// </summary>
-public class TestFallbackError : ILocalizableString
+public class TestFallbackError : ILocalizable
 {
     // These are NOT declared-only properties, simulating inheritance
     public string FieldName { get; }

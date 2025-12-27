@@ -7,11 +7,11 @@ namespace Bogoware.Localization;
 /// Culture-insensitive — always returns the registered template regardless of the requested culture.
 /// Intended for unit testing scenarios where culture fallback is not under test.
 /// </summary>
-public class InMemoryLocalizedMessageRegistry : ILocalizedMessageRegistry
+public class InMemoryLocalizationRegistry : ILocalizationRegistry
 {
     private readonly Dictionary<string, string> _templates;
 
-    internal InMemoryLocalizedMessageRegistry(Dictionary<string, string> templates)
+    internal InMemoryLocalizationRegistry(Dictionary<string, string> templates)
     {
         _templates = templates;
     }

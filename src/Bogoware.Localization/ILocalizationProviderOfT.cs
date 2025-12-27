@@ -6,7 +6,7 @@ namespace Bogoware.Localization;
 /// External DI provider that can localize instances of <typeparamref name="T"/>.
 /// No constraint on T — any type can have an external localization provider.
 /// </summary>
-public interface ILocalizableStringProvider<in T>
+public interface ILocalizationProvider<in T>
 {
     string Localize(T value, CultureInfo? culture = null);
 }

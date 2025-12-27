@@ -5,7 +5,7 @@ namespace Bogoware.Localization;
 /// <summary>
 /// Self-localizing types that can produce their own localized string representation.
 /// </summary>
-public interface ILocalizableStringProvider : ILocalizableString
+public interface ILocalizationProvider : ILocalizable
 {
     string Localize(CultureInfo? culture = null);
 }

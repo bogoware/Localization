@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Bogoware.Localization.Tests;
 
-public class LocalizableStringFormatterTests
+public class LocalizationFormatterTests
 {
     private static IServiceProvider EmptyServiceProvider()
         => new ServiceCollection().BuildServiceProvider();
@@ -13,8 +13,8 @@ public class LocalizableStringFormatterTests
     [Fact]
     public void Format_SelfProvider_UsesLocalize()
     {
-        var registry = new InMemoryLocalizedMessageRegistryBuilder().Build();
-        var formatter = new LocalizedMessageFormatter(registry, EmptyServiceProvider());
+        var registry = new InMemoryLocalizationRegistryBuilder().Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
         var self = new TestSelfProvider("hello from self");
 
         var result = formatter.Format(self);
@@ -25,13 +25,13 @@ public class LocalizableStringFormatterTests
     [Fact]
     public void Format_DiProvider_ResolvesFromContainer()
     {
-        var registry = new InMemoryLocalizedMessageRegistryBuilder().Build();
+        var registry = new InMemoryLocalizationRegistryBuilder().Build();
         var services = new ServiceCollection();
-        services.AddSingleton<ILocalizableStringProvider<TestLocalizableString>>(new TestDiProvider());
+        services.AddSingleton<ILocalizationProvider<TestLocalizable>>(new TestDiProvider());
         var sp = services.BuildServiceProvider();
 
-        var formatter = new LocalizedMessageFormatter(registry, sp);
-        var value = new TestLocalizableString();
+        var formatter = new LocalizationFormatter(registry, sp);
+        var value = new TestLocalizable();
 
         var result = formatter.Format(value);
 
@@ -41,10 +41,10 @@ public class LocalizableStringFormatterTests
     [Fact]
     public void Format_RegistryTemplate_FormatsWithPlaceholders()
     {
-        var registry = new InMemoryLocalizedMessageRegistryBuilder()
+        var registry = new InMemoryLocalizationRegistryBuilder()
             .Add<TestRequiredFieldError>("'{FieldName}' is required")
             .Build();
-        var formatter = new LocalizedMessageFormatter(registry, EmptyServiceProvider());
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
 
         var error = new TestRequiredFieldError("Email");
 
@@ -57,8 +57,8 @@ public class LocalizableStringFormatterTests
     [Fact]
     public void Format_BuildsFallbackWhenNoTemplate()
     {
-        var registry = new InMemoryLocalizedMessageRegistryBuilder().Build();
-        var formatter = new LocalizedMessageFormatter(registry, EmptyServiceProvider());
+        var registry = new InMemoryLocalizationRegistryBuilder().Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
         var error = new TestMaxLengthError("Name", 5);
 
         var result = formatter.Format(error);
@@ -68,12 +68,12 @@ public class LocalizableStringFormatterTests
     }
 
     [Fact]
-    public void FormatT_ILocalizableString_DelegatesToFormatOverload()
+    public void FormatT_ILocalizable_DelegatesToFormatOverload()
     {
-        var registry = new InMemoryLocalizedMessageRegistryBuilder()
+        var registry = new InMemoryLocalizationRegistryBuilder()
             .Add<TestRequiredFieldError>("'{FieldName}' is required")
             .Build();
-        var formatter = new LocalizedMessageFormatter(registry, EmptyServiceProvider());
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
 
         var error = new TestRequiredFieldError("Name");
 
@@ -85,8 +85,8 @@ public class LocalizableStringFormatterTests
     [Fact]
     public void FormatT_NonLocalizable_FallsBackToToString()
     {
-        var registry = new InMemoryLocalizedMessageRegistryBuilder().Build();
-        var formatter = new LocalizedMessageFormatter(registry, EmptyServiceProvider());
+        var registry = new InMemoryLocalizationRegistryBuilder().Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
 
         var result = formatter.Format(42);
 
@@ -97,6 +97,6 @@ public class LocalizableStringFormatterTests
     public void TestType_IsLocalizableString()
     {
         var error = new TestRequiredFieldError("X");
-        Assert.IsAssignableFrom<ILocalizableString>(error);
+        Assert.IsAssignableFrom<ILocalizable>(error);
     }
 }
