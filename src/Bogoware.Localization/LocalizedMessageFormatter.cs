@@ -40,11 +40,6 @@ public class LocalizedMessageFormatter(
         }
 
         // 4. Fallback
-        if (value is LocalizedMessage msg)
-        {
-            return msg.FallbackMessage;
-        }
-
         return BuildFallback(value);
     }
 
@@ -92,7 +87,7 @@ public class LocalizedMessageFormatter(
     {
         var props = source.GetType()
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p => p.Name != "Message" && p.Name != "FallbackMessage" && p.CanRead);
+            .Where(p => p.Name != "Message" && p.CanRead);
 
         var result = template;
         foreach (var prop in props)
@@ -112,7 +107,7 @@ public class LocalizedMessageFormatter(
         var typeName = source.GetType().Name;
         var props = source.GetType()
             .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-            .Where(p => p.Name != "Message" && p.Name != "FallbackMessage" && p.CanRead);
+            .Where(p => p.Name != "Message" && p.CanRead);
 
         var attrs = string.Join(", ", props.Select(p => $"{p.Name}={p.GetValue(source)}"));
         return attrs.Length > 0 ? $"{typeName}({attrs})" : typeName;
