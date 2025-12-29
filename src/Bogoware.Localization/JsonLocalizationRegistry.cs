@@ -8,18 +8,35 @@ namespace Bogoware.Localization;
 /// </summary>
 public class JsonLocalizationRegistry : ILocalizationRegistry
 {
+    private static readonly JsonSerializerOptions JsoncOptions = new()
+    {
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true
+    };
+
     private readonly Dictionary<string, Dictionary<string, string>> _templates = new();
 
     /// <summary>
-    /// Loads message templates from a JSON string (FQDN -> template pairs) for the specified culture.
+    /// Loads message templates from a JSON or JSONC string (FQDN → template pairs) for the specified culture.
     /// </summary>
+    /// <param name="json">
+    /// A JSON (or JSONC) object mapping fully qualified type names to format template strings
+    /// (e.g. <c>{ "MyApp.Errors.NotFound": "Resource '{Id}' was not found." }</c>).
+    /// Both single-line (<c>//</c>) and block (<c>/* */</c>) comments are accepted, as well as trailing commas.
+    /// </param>
+    /// <param name="culture">The culture these templates belong to. Use <see cref="CultureInfo.InvariantCulture"/> for the default fallback.</param>
+    /// <remarks>
+    /// When the same FQDN key already exists for the given culture, the new value silently
+    /// overrides the previous one. This merge-on-conflict behavior lets downstream assemblies
+    /// override templates defined by upstream assemblies.
+    /// </remarks>
     public void LoadFromJson(string json, CultureInfo culture)
     {
         var key = culture.Name;
         if (!_templates.ContainsKey(key))
             _templates[key] = new Dictionary<string, string>();
 
-        var entries = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+        var entries = JsonSerializer.Deserialize<Dictionary<string, string>>(json, JsoncOptions);
         if (entries is null) return;
 
         foreach (var (fqdn, template) in entries)
@@ -29,9 +46,19 @@ public class JsonLocalizationRegistry : ILocalizationRegistry
     }
 
     /// <summary>
-    /// Attempts to retrieve a template for the given FQDN, trying exact culture, parent culture,
-    /// then invariant culture in order.
+    /// Attempts to retrieve a template for the given FQDN and culture.
     /// </summary>
+    /// <param name="fqdn">The fully qualified type name used as the template key.</param>
+    /// <param name="culture">The desired culture for the lookup.</param>
+    /// <param name="template">
+    /// When this method returns <see langword="true"/>, contains the resolved template.
+    /// When <see langword="false"/>, set to <see langword="null"/>.
+    /// </param>
+    /// <returns><see langword="true"/> if a matching template was found; otherwise <see langword="false"/>.</returns>
+    /// <remarks>
+    /// The lookup follows a 3-tier fallback: exact culture → parent culture → invariant culture
+    /// (empty culture name). The first match wins.
+    /// </remarks>
     public bool TryGetTemplate(string fqdn, CultureInfo culture, out string template)
     {
         if (_templates.TryGetValue(culture.Name, out var cultureDict) && cultureDict.TryGetValue(fqdn, out template!))
