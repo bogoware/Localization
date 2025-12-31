@@ -1,6 +1,12 @@
 # Bogoware.Localization
 
+![Nuget](https://img.shields.io/nuget/dt/Bogoware.Localization?logo=nuget&style=plastic) ![Nuget](https://img.shields.io/nuget/v/Bogoware.Localization?style=plastic) [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://bogoware.github.io/Localization/)
+
 Lightweight, FQDN-keyed localization library for .NET with DI support, culture fallback chains, and pluggable providers.
+
+**Supported Platforms:** .NET 8 | .NET 10
+
+[Documentation](https://bogoware.github.io/Localization/) | [CHANGELOG](./CHANGELOG.md) | [NuGet Package](https://www.nuget.org/packages/Bogoware.Localization)
 
 ## Features
 
@@ -78,4 +84,4 @@ The formatter resolves localized strings in this order:
 
 ## License
 
-MIT
+[MIT](./LICENSE)
