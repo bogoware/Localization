@@ -47,9 +47,8 @@ jobs:
       - name: Find XML documentation
         id: find-xml
         run: |
-          XML_FILE=$(find src -name "Bogoware.Localization.xml" -path "*/bin/Release/*" | head -1)
-          DLL_FILE=$(find src -name "Bogoware.Localization.dll" -path "*/bin/Release/*" | grep -v "/ref/" | head -1)
-          echo "xml_file=$XML_FILE" >> "$GITHUB_OUTPUT"
+          # Use net8.0 build output — xmldoc2md can't load net10.0 assemblies
+          DLL_FILE=$(find src -name "Bogoware.Localization.dll" -path "*/bin/Release/net8.0/*" | grep -v "/ref/" | head -1)
           echo "dll_file=$DLL_FILE" >> "$GITHUB_OUTPUT"
 
       - name: Generate API documentation
