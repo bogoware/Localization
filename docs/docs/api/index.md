@@ -1,18 +1,30 @@
 ---
-title: API Reference
+title: "API Reference"
 sidebar_position: 1
 ---
 
-# API Reference
+# Bogoware.Localization
 
-The API reference documentation is auto-generated from XML documentation comments in the source code.
+## Bogoware.Localization
 
-When building locally, run the following to generate the API docs:
+[ILocalizable](./bogoware.localization.ilocalizable)
 
-```bash
-dotnet tool restore
-dotnet build -c Release
-dotnet xmldoc2md src/Bogoware.Localization/bin/Release/net10.0/Bogoware.Localization.dll -o docs/docs/api --index-page-name index --github-pages
-```
+[ILocalizationFormatter](./bogoware.localization.ilocalizationformatter)
 
-In CI, API documentation is generated automatically by the `docs.yml` workflow.
+[ILocalizationProvider](./bogoware.localization.ilocalizationprovider)
+
+[ILocalizationProvider&lt;T&gt;](./bogoware.localization.ilocalizationprovider-1)
+
+[ILocalizationRegistry](./bogoware.localization.ilocalizationregistry)
+
+[InMemoryLocalizationRegistry](./bogoware.localization.inmemorylocalizationregistry)
+
+[InMemoryLocalizationRegistryBuilder](./bogoware.localization.inmemorylocalizationregistrybuilder)
+
+[JsonLocalizationRegistry](./bogoware.localization.jsonlocalizationregistry)
+
+[JsonLocalizationRegistryBuilder](./bogoware.localization.jsonlocalizationregistrybuilder)
+
+[LocalizationFormatter](./bogoware.localization.localizationformatter)
+
+[LocalizationServiceCollectionExtensions](./bogoware.localization.localizationservicecollectionextensions)
