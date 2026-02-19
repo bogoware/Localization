@@ -28,6 +28,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Determine version from git tag
+        id: version
+        run: |
+          $tag = if ($env:GITHUB_REF -match '^refs/tags/v(.+)$') { $Matches[1] } else { '0.0.0-local' }
+          Write-Host "Resolved version: $tag"
+          "PACKAGE_VERSION=$tag" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -39,12 +46,13 @@ jobs:
         run: dotnet restore Bogoware.Localization.slnx
 
       - name: Build
-        run: dotnet build Bogoware.Localization.slnx --no-restore -c Release
+        run: dotnet build Bogoware.Localization.slnx --no-restore -c Release /p:Version=${{ steps.version.outputs.PACKAGE_VERSION }}
 
       - name: Test
         run: dotnet test Bogoware.Localization.slnx --no-build --verbosity normal -c Release
 
-      - run: dotnet pack src/Bogoware.Localization/Bogoware.Localization.csproj --output ${{ env.NuGetDirectory }} -c Release
+      - name: Pack
+        run: dotnet pack src/Bogoware.Localization/Bogoware.Localization.csproj --output ${{ env.NuGetDirectory }} -c Release --no-build /p:Version=${{ steps.version.outputs.PACKAGE_VERSION }}
 
       - uses: actions/upload-artifact@v4
         with:
