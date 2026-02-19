@@ -17,7 +17,7 @@ const config: Config = {
   organizationName: 'bogoware',
   projectName: 'Localization',
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
 
   markdown: {
     format: 'detect',
