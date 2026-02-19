@@ -23,10 +23,6 @@ public class TestDiProvider : ILocalizableStringProvider<TestLocalizableString>
     public string Localize(TestLocalizableString value, CultureInfo? culture = null) => "from DI provider";
 }
 
-/// <summary>
-/// LocalizedMessage subclass for testing fallback behavior.
-/// </summary>
-public class TestLocalizedMessage(string fallback) : LocalizedMessage(fallback);
 
 /// <summary>
 /// Simulates a validation error with a FieldName property for template substitution tests.

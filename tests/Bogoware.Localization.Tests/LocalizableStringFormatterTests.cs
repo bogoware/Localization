@@ -53,17 +53,6 @@ public class LocalizableStringFormatterTests
         Assert.Equal("'Email' is required", result);
     }
 
-    [Fact]
-    public void Format_LocalizedMessage_FallsBackToFallbackMessage()
-    {
-        var registry = new InMemoryLocalizedMessageRegistryBuilder().Build();
-        var formatter = new LocalizedMessageFormatter(registry, EmptyServiceProvider());
-        var msg = new TestLocalizedMessage("my fallback");
-
-        var result = formatter.Format(msg);
-
-        Assert.Equal("my fallback", result);
-    }
 
     [Fact]
     public void Format_BuildsFallbackWhenNoTemplate()
