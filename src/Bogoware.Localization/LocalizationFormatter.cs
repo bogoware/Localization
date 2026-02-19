@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
@@ -73,13 +74,15 @@ public class LocalizationFormatter(
         return result;
     }
 
+    private static readonly ConcurrentDictionary<Type, MethodInfo> _localizeMethodCache = new();
+
     private string? TryFormatViaDiProvider(Type runtimeType, object value, CultureInfo culture)
     {
         var providerType = typeof(ILocalizationProvider<>).MakeGenericType(runtimeType);
         var provider = serviceProvider.GetService(providerType);
         if (provider is null) return null;
 
-        var localizeMethod = providerType.GetMethod("Localize")!;
+        var localizeMethod = _localizeMethodCache.GetOrAdd(providerType, t => t.GetMethod("Localize")!);
         return (string)localizeMethod.Invoke(provider, [value, culture])!;
     }
 

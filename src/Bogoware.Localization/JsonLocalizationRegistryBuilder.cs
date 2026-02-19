@@ -140,7 +140,16 @@ public class JsonLocalizationRegistryBuilder(ILogger? logger = null)
                 && i + 2 < parts.Length
                 && parts[i + 2] == "json")
             {
-                return parts[i + 1];
+                var candidate = parts[i + 1];
+                try
+                {
+                    CultureInfo.GetCultureInfo(candidate);
+                    return candidate;
+                }
+                catch (CultureNotFoundException)
+                {
+                    continue;
+                }
             }
         }
         return "";

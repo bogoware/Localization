@@ -93,6 +93,12 @@ public class ExhaustiveModeDto
     public OrderConfirmation? Confirmation { get; set; }
 }
 
+public class ExhaustiveToStringFallbackDto
+{
+    public int Code { get; set; }
+    public NonLocalizableAddress? Address { get; set; }
+}
+
 // ──────────────────────── Tests ────────────────────────
 
 public class LocalizableJsonSerializationTests
@@ -364,5 +370,111 @@ public class LocalizableJsonSerializationTests
         var result = options.AddLocalization(formatter);
 
         Assert.Same(options, result);
+    }
+
+    // ──── Collection with null elements ────
+
+    [Fact]
+    public void AutoMode_CollectionWithNullElements_SerializesNullsAsJsonNull()
+    {
+        var formatter = CreateFormatter(
+            r => r.Add<TestRequiredFieldError>("'{FieldName}' is required"));
+        var options = CreateOptions(formatter);
+
+        var dto = new AutoModeDto
+        {
+            StatusCode = 400,
+            Warnings = [new TestRequiredFieldError("Name"), null!, new TestRequiredFieldError("Email")]
+        };
+
+        var json = JsonSerializer.Serialize(dto, options);
+        using var doc = JsonDocument.Parse(json);
+
+        var warnings = doc.RootElement.GetProperty("Warnings");
+        Assert.Equal(JsonValueKind.Array, warnings.ValueKind);
+        Assert.Equal(3, warnings.GetArrayLength());
+        Assert.Equal("'Name' is required", warnings[0].GetString());
+        Assert.Equal(JsonValueKind.Null, warnings[1].ValueKind);
+        Assert.Equal("'Email' is required", warnings[2].GetString());
+    }
+
+    // ──── Format<T> with null ────
+
+    [Fact]
+    public void FormatGeneric_NullValue_ReturnsEmptyString()
+    {
+        var formatter = CreateFormatter();
+
+        var result = formatter.Format<TestLocalizable>(null!);
+
+        Assert.Equal("", result);
+    }
+
+    // ──── Exhaustive mode ToString fallback ────
+
+    [Fact]
+    public void ExhaustiveMode_NoProvider_FallsBackToToString()
+    {
+        var formatter = CreateFormatter();
+        var options = CreateOptions(formatter, LocalizationSerializationMode.Exhaustive);
+
+        var dto = new ExhaustiveToStringFallbackDto
+        {
+            Code = 200,
+            Address = new NonLocalizableAddress { Street = "123 Main St", City = "Springfield" }
+        };
+
+        var json = JsonSerializer.Serialize(dto, options);
+        using var doc = JsonDocument.Parse(json);
+
+        Assert.Equal(200, doc.RootElement.GetProperty("Code").GetInt32());
+        Assert.Equal("123 Main St, Springfield", doc.RootElement.GetProperty("Address").GetString());
+    }
+
+    // ──── [DoNotLocalize] in Exhaustive mode ────
+
+    [Fact]
+    public void ExhaustiveMode_DoNotLocalize_SerializesAsObject()
+    {
+        var formatter = CreateFormatter(
+            r => r.Add<TestRequiredFieldError>("'{FieldName}' is required"));
+        var options = CreateOptions(formatter, LocalizationSerializationMode.Exhaustive);
+
+        var dto = new DoNotLocalizeDto
+        {
+            Error = new TestRequiredFieldError("Email"),
+            RawError = new TestRequiredFieldError("Email")
+        };
+
+        var json = JsonSerializer.Serialize(dto, options);
+        using var doc = JsonDocument.Parse(json);
+
+        // Error is localized even in Exhaustive mode (ILocalizable)
+        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("Error").GetString());
+        // RawError has [DoNotLocalize] → serialized as object even in Exhaustive mode
+        Assert.Equal(JsonValueKind.Object, doc.RootElement.GetProperty("RawError").ValueKind);
+        Assert.Equal("Email", doc.RootElement.GetProperty("RawError").GetProperty("FieldName").GetString());
+    }
+
+    // ──── Invariant culture fallback in registry ────
+
+    [Fact]
+    public void InvariantCultureFallback_ResolvesWhenSpecificCultureMissing()
+    {
+        // Build a JsonLocalizationRegistry with only an invariant-culture template
+        var registry = new JsonLocalizationRegistry();
+        var fqdn = typeof(TestRequiredFieldError).FullName!;
+        var json = $$"""{ "{{fqdn}}": "'{FieldName}' is required" }""";
+        registry.LoadFromJson(json, CultureInfo.InvariantCulture);
+
+        var services = new ServiceCollection();
+        var sp = services.BuildServiceProvider();
+        var formatter = new LocalizationFormatter(registry, sp);
+
+        // Look up with a specific culture that has no entry → should fall back to invariant
+        var error = new TestRequiredFieldError("Email");
+        var result = formatter.Format(error, new CultureInfo("fr-FR"));
+
+        Assert.Equal("'Email' is required", result);
     }
 }

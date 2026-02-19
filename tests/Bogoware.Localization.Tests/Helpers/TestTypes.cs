@@ -104,3 +104,14 @@ public class TestFallbackError : ILocalizable
         MaxLength = maxLength;
     }
 }
+
+/// <summary>
+/// Non-ILocalizable complex type with a custom ToString() for exhaustive mode fallback testing.
+/// </summary>
+public class NonLocalizableAddress
+{
+    public string Street { get; set; } = "";
+    public string City { get; set; } = "";
+
+    public override string ToString() => $"{Street}, {City}";
+}

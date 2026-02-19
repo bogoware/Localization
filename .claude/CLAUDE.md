@@ -37,3 +37,11 @@ Localization/
 - Central package management: versions only in `Directory.Packages.props`
 - Test embedded resources use `WithCulture="false"` to prevent MSBuild satellite assembly routing
 - Package ID: `Bogoware.Localization`, published to NuGet.org on `v*` tags
+
+## Post-Task Review Practices
+
+Every development task MUST conclude with the following review agents run in parallel:
+
+1. **Code Simplification & Refactoring Review** — Review source code for simplification opportunities, unnecessary complexity, and refactoring suggestions (`feature-dev:code-reviewer` agent scoped to `src/`)
+2. **Documentation Coherence & Coverage Review** — Verify documentation covers new/modified features, cross-references are consistent, and changelog is updated (`pr-review-toolkit:comment-analyzer` agent scoped to `docs/` + `README.md`)
+3. **Test QA Review** — Assess test quality, coverage gaps, missing edge cases, and confirm all tests pass (`pr-review-toolkit:pr-test-analyzer` agent scoped to `tests/`)

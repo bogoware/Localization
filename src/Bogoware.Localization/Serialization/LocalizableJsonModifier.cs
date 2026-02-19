@@ -78,15 +78,7 @@ internal static class LocalizableJsonModifier
 
     private static bool IsLocalizableType(Type type)
     {
-        // Direct assignment check: ILocalizable, IEnumerable<ILocalizable>, List<ILocalizable>, etc.
-        if (typeof(ILocalizable).IsAssignableFrom(type))
-            return true;
-
-        // Check for IEnumerable<T> where T : ILocalizable
-        if (IsEnumerableOfLocalizable(type))
-            return true;
-
-        return false;
+        return typeof(ILocalizable).IsAssignableFrom(type) || IsEnumerableOfLocalizable(type);
     }
 
     private static bool IsEnumerableOfLocalizable(Type type)
@@ -140,16 +132,22 @@ internal static class LocalizableJsonModifier
         if (type == typeof(string))
             return null;
 
-        foreach (var iface in type.GetInterfaces())
-        {
-            if (iface.IsGenericType && iface.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-                return iface.GetGenericArguments()[0];
-        }
-
-        // Also check the type itself if it's a generic IEnumerable<T>
+        // Check the type itself first if it's a generic IEnumerable<T>
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
             return type.GetGenericArguments()[0];
 
-        return null;
+        // Fall back to scanning interfaces; collect all IEnumerable<T> matches
+        Type? match = null;
+        foreach (var iface in type.GetInterfaces())
+        {
+            if (iface.IsGenericType && iface.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+            {
+                if (match is not null)
+                    return null; // Ambiguous — multiple IEnumerable<T> implementations
+                match = iface.GetGenericArguments()[0];
+            }
+        }
+
+        return match;
     }
 }
