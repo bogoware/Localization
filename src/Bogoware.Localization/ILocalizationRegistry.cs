@@ -6,7 +6,7 @@ namespace Bogoware.Localization;
 /// Represents a contract for managing culture-specific message templates
 /// associated with fully qualified domain names (FQDNs).
 /// </summary>
-public interface ILocalizedMessageRegistry
+public interface ILocalizationRegistry
 {
     bool TryGetTemplate(string fqdn, CultureInfo culture, out string template);
 }

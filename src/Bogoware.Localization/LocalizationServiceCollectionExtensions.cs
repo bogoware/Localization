@@ -11,21 +11,21 @@ public static class LocalizationServiceCollectionExtensions
     /// The builder receives an <see cref="ILogger"/> from the service provider at resolution time.
     /// </summary>
     public static IServiceCollection AddLocalization(
-        this IServiceCollection services, Action<JsonLocalizedMessageRegistryBuilder> configure)
+        this IServiceCollection services, Action<JsonLocalizationRegistryBuilder> configure)
     {
-        services.AddSingleton<ILocalizedMessageRegistry>(sp =>
+        services.AddSingleton<ILocalizationRegistry>(sp =>
         {
-            var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<JsonLocalizedMessageRegistryBuilder>();
-            var builder = new JsonLocalizedMessageRegistryBuilder(logger);
+            var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<JsonLocalizationRegistryBuilder>();
+            var builder = new JsonLocalizationRegistryBuilder(logger);
             configure(builder);
             return builder.Build();
         });
 
-        services.AddSingleton<ILocalizedMessageFormatter>(sp =>
+        services.AddSingleton<ILocalizationFormatter>(sp =>
         {
-            var registry = sp.GetRequiredService<ILocalizedMessageRegistry>();
-            var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<LocalizedMessageFormatter>();
-            return new LocalizedMessageFormatter(registry, sp, logger);
+            var registry = sp.GetRequiredService<ILocalizationRegistry>();
+            var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<LocalizationFormatter>();
+            return new LocalizationFormatter(registry, sp, logger);
         });
 
         return services;

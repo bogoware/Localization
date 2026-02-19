@@ -5,21 +5,21 @@ using Microsoft.Extensions.Logging;
 namespace Bogoware.Localization;
 
 /// <summary>
-/// Unified formatter with resolution chain for <see cref="ILocalizableString"/> and arbitrary values.
+/// Unified formatter with resolution chain for <see cref="ILocalizable"/> and arbitrary values.
 /// </summary>
-public class LocalizedMessageFormatter(
-    ILocalizedMessageRegistry registry,
+public class LocalizationFormatter(
+    ILocalizationRegistry registry,
     IServiceProvider serviceProvider,
-    ILogger<LocalizedMessageFormatter>? logger = null)
-    : ILocalizedMessageFormatter
+    ILogger<LocalizationFormatter>? logger = null)
+    : ILocalizationFormatter
 {
     /// <inheritdoc />
-    public string Format(ILocalizableString value, CultureInfo? culture = null)
+    public string Format(ILocalizable value, CultureInfo? culture = null)
     {
         culture ??= CultureInfo.CurrentUICulture;
 
         // 1. Self-provider
-        if (value is ILocalizableStringProvider selfProvider)
+        if (value is ILocalizationProvider selfProvider)
         {
             return selfProvider.Localize(culture);
         }
@@ -46,8 +46,8 @@ public class LocalizedMessageFormatter(
     /// <inheritdoc />
     public string Format<T>(T value, CultureInfo? culture = null)
     {
-        // 1. If it's an ILocalizableString, delegate
-        if (value is ILocalizableString ls)
+        // 1. If it's an ILocalizable, delegate
+        if (value is ILocalizable ls)
         {
             return Format(ls, culture);
         }
@@ -75,7 +75,7 @@ public class LocalizedMessageFormatter(
 
     private string? TryFormatViaDiProvider(Type runtimeType, object value, CultureInfo culture)
     {
-        var providerType = typeof(ILocalizableStringProvider<>).MakeGenericType(runtimeType);
+        var providerType = typeof(ILocalizationProvider<>).MakeGenericType(runtimeType);
         var provider = serviceProvider.GetService(providerType);
         if (provider is null) return null;
 

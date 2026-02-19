@@ -6,7 +6,7 @@ namespace Bogoware.Localization;
 /// <summary>
 /// JSON-backed registry for managing localized message templates with culture fallback chain.
 /// </summary>
-public class JsonLocalizedMessageRegistry : ILocalizedMessageRegistry
+public class JsonLocalizationRegistry : ILocalizationRegistry
 {
     private readonly Dictionary<string, Dictionary<string, string>> _templates = new();
 

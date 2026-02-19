@@ -5,12 +5,12 @@ using Xunit;
 
 namespace Bogoware.Localization.Tests;
 
-public class JsonLocalizedMessageRegistryTests
+public class JsonLocalizationRegistryTests
 {
-    private JsonLocalizedMessageRegistry LoadTestRegistry()
+    private JsonLocalizationRegistry LoadTestRegistry()
     {
-        var builder = new JsonLocalizedMessageRegistryBuilder();
-        builder.AddFromAssemblyResources(typeof(JsonLocalizedMessageRegistryTests).Assembly);
+        var builder = new JsonLocalizationRegistryBuilder();
+        builder.AddFromAssemblyResources(typeof(JsonLocalizationRegistryTests).Assembly);
         return builder.Build();
     }
 
@@ -43,7 +43,7 @@ public class JsonLocalizedMessageRegistryTests
     [Fact]
     public void LaterLoad_OverridesEarlier()
     {
-        var registry = new JsonLocalizedMessageRegistry();
+        var registry = new JsonLocalizationRegistry();
 
         var baseJson = """{ "Key": "base" }""";
         registry.LoadFromJson(baseJson, new CultureInfo("en-US"));
@@ -73,7 +73,7 @@ public class JsonLocalizedMessageRegistryTests
     [Fact]
     public void CultureFallback_ParentCulture()
     {
-        var registry = new JsonLocalizedMessageRegistry();
+        var registry = new JsonLocalizationRegistry();
         registry.LoadFromJson("""{ "Key": "from en" }""", new CultureInfo("en"));
 
         Assert.True(registry.TryGetTemplate("Key", new CultureInfo("en-US"), out var template));
@@ -86,10 +86,10 @@ public class JsonLocalizedMessageRegistryTests
     public void RequiredFieldError_FormatsCorrectly_EnUs()
     {
         var registry = LoadTestRegistry();
-        var formatter = new LocalizedMessageFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
 
         var error = new TestRequiredFieldError("Code");
-        var result = formatter.Format((ILocalizableString)error, new CultureInfo("en-US"));
+        var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
         Assert.Equal("'Code' is required", result);
     }
@@ -98,10 +98,10 @@ public class JsonLocalizedMessageRegistryTests
     public void RequiredFieldError_FormatsCorrectly_ItIt()
     {
         var registry = LoadTestRegistry();
-        var formatter = new LocalizedMessageFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
 
         var error = new TestRequiredFieldError("Code");
-        var result = formatter.Format((ILocalizableString)error, new CultureInfo("it-IT"));
+        var result = formatter.Format((ILocalizable)error, new CultureInfo("it-IT"));
 
         Assert.Equal("'Code' è obbligatorio", result);
     }
@@ -110,10 +110,10 @@ public class JsonLocalizedMessageRegistryTests
     public void InvalidEmailError_FormatsCorrectly_EnUs()
     {
         var registry = LoadTestRegistry();
-        var formatter = new LocalizedMessageFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
 
         var error = new TestInvalidEmailError("Email");
-        var result = formatter.Format((ILocalizableString)error, new CultureInfo("en-US"));
+        var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
         Assert.Equal("'Email' is not a valid email address", result);
     }
@@ -122,10 +122,10 @@ public class JsonLocalizedMessageRegistryTests
     public void MaxLengthError_SubstitutesPlaceholders_EnUs()
     {
         var registry = LoadTestRegistry();
-        var formatter = new LocalizedMessageFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
 
         var error = new TestMaxLengthError("Name", 5);
-        var result = formatter.Format((ILocalizableString)error, new CultureInfo("en-US"));
+        var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
         Assert.Equal("'Name' must not exceed 5 characters", result);
     }
@@ -134,10 +134,10 @@ public class JsonLocalizedMessageRegistryTests
     public void MaxLengthError_SubstitutesPlaceholders_ItIt()
     {
         var registry = LoadTestRegistry();
-        var formatter = new LocalizedMessageFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
 
         var error = new TestMaxLengthError("Name", 5);
-        var result = formatter.Format((ILocalizableString)error, new CultureInfo("it-IT"));
+        var result = formatter.Format((ILocalizable)error, new CultureInfo("it-IT"));
 
         Assert.Equal("'Name' non deve superare 5 caratteri", result);
     }
@@ -146,10 +146,10 @@ public class JsonLocalizedMessageRegistryTests
     public void MustBeGreaterThanError_SubstitutesPlaceholders()
     {
         var registry = LoadTestRegistry();
-        var formatter = new LocalizedMessageFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
 
         var error = new TestMustBeGreaterThanError("Length", 0);
-        var result = formatter.Format((ILocalizableString)error, new CultureInfo("en-US"));
+        var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
         Assert.Equal("'Length' must be greater than 0", result);
     }
@@ -158,10 +158,10 @@ public class JsonLocalizedMessageRegistryTests
     public void OutOfRangeError_SubstitutesMinAndMax()
     {
         var registry = LoadTestRegistry();
-        var formatter = new LocalizedMessageFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
 
         var error = new TestOutOfRangeError("Port", 99999, 1, 65535);
-        var result = formatter.Format((ILocalizableString)error, new CultureInfo("en-US"));
+        var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
         Assert.Equal("'Port' must be between 1 and 65535", result);
     }
@@ -170,10 +170,10 @@ public class JsonLocalizedMessageRegistryTests
     public void InvalidFormatError_SubstitutesExpectedFormat()
     {
         var registry = LoadTestRegistry();
-        var formatter = new LocalizedMessageFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
 
         var error = new TestInvalidFormatError("Code", "3 digits");
-        var result = formatter.Format((ILocalizableString)error, new CultureInfo("en-US"));
+        var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
         Assert.Equal("'Code' does not match expected format: 3 digits", result);
     }
@@ -192,10 +192,10 @@ public class JsonLocalizedMessageRegistryTests
         """;
         registry.LoadFromJson(overrideJson, new CultureInfo("en-US"));
 
-        var formatter = new LocalizedMessageFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
         var error = new TestRequiredFieldError("Code");
 
-        var result = formatter.Format((ILocalizableString)error, new CultureInfo("en-US"));
+        var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
         Assert.Equal("Field 'Code' cannot be blank", result);
     }
@@ -212,13 +212,13 @@ public class JsonLocalizedMessageRegistryTests
         """;
         registry.LoadFromJson(overrideJson, new CultureInfo("en-US"));
 
-        var formatter = new LocalizedMessageFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
 
         var required = new TestRequiredFieldError("X");
-        Assert.Equal("OVERRIDDEN", formatter.Format((ILocalizableString)required, new CultureInfo("en-US")));
+        Assert.Equal("OVERRIDDEN", formatter.Format((ILocalizable)required, new CultureInfo("en-US")));
 
         var maxLength = new TestMaxLengthError("Name", 5);
-        Assert.Equal("'Name' must not exceed 5 characters", formatter.Format((ILocalizableString)maxLength, new CultureInfo("en-US")));
+        Assert.Equal("'Name' must not exceed 5 characters", formatter.Format((ILocalizable)maxLength, new CultureInfo("en-US")));
     }
 
     [Fact]
@@ -233,9 +233,9 @@ public class JsonLocalizedMessageRegistryTests
         """;
         registry.LoadFromJson(overrideJson, new CultureInfo("en-US"));
 
-        var formatter = new LocalizedMessageFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
 
-        Assert.Equal("OVERRIDDEN", formatter.Format((ILocalizableString)new TestRequiredFieldError("X"), new CultureInfo("en-US")));
-        Assert.Equal("'X' è obbligatorio", formatter.Format((ILocalizableString)new TestRequiredFieldError("X"), new CultureInfo("it-IT")));
+        Assert.Equal("OVERRIDDEN", formatter.Format((ILocalizable)new TestRequiredFieldError("X"), new CultureInfo("en-US")));
+        Assert.Equal("'X' è obbligatorio", formatter.Format((ILocalizable)new TestRequiredFieldError("X"), new CultureInfo("it-IT")));
     }
 }
