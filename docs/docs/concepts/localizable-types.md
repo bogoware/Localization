@@ -53,3 +53,7 @@ public class CustomError : ILocalizable, ILocalizationProvider
 ```
 
 This is the highest priority in the [provider resolution chain](./provider-chain).
+
+## JSON Serialization
+
+`ILocalizable` types are automatically localized during JSON serialization when using Auto mode (the default). Instead of being serialized as objects with their public properties, they are converted to localized strings via the formatter. See the [JSON Serialization guide](../guides/json-serialization) for setup and configuration options.

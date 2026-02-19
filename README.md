@@ -82,6 +82,30 @@ The formatter resolves localized strings in this order:
 4. **Fallback message** — uses the default fallback format
 5. **Default fallback** — `TypeName(Prop1=val1, Prop2=val2)`
 
+## JSON Serialization
+
+Localize `ILocalizable` properties automatically during JSON serialization:
+
+```csharp
+using Bogoware.Localization.Serialization;
+
+var options = new JsonSerializerOptions { WriteIndented = true };
+options.AddLocalization(formatter);
+
+var dto = new ApiResponse
+{
+    StatusCode = 400,
+    Error = new RequiredFieldError("Email")
+};
+
+var json = JsonSerializer.Serialize(dto, options);
+// → { "StatusCode": 400, "Error": "'Email' is required" }
+```
+
+Three modes are available: **Explicit** (only `[Localize]`-marked properties), **Auto** (default — all `ILocalizable` + `[Localize]`), and **Exhaustive** (every property attempted). Use `[DoNotLocalize]` to opt out specific properties.
+
+See the [JSON Serialization guide](https://bogoware.github.io/Localization/guides/json-serialization) for full details.
+
 ## License
 
 [MIT](./LICENSE)

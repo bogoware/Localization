@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- JSON serialization support via `JsonSerializerOptions.AddLocalization()` extension method
+- Three serialization modes: `Explicit`, `Auto` (default), `Exhaustive`
+- `[Localize]` attribute for opting in non-`ILocalizable` properties
+- `[DoNotLocalize]` attribute for opting out specific properties
+- Collection support: `IEnumerable<ILocalizable>` serializes as array of localized strings
+- Fixed culture override for serialization
+
 ## [0.1.0] - 2026-02-19
 
 ### Added
