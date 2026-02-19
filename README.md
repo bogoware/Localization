@@ -16,7 +16,7 @@ Lightweight, FQDN-keyed localization library for .NET with DI support, culture f
 - **JSON registry** — load templates from embedded resources, files, or raw JSON strings
 - **In-memory registry** — simple dictionary-backed registry for testing
 - **DI integration** — `IServiceCollection.AddLocalization()` extension methods
-- **Zero DDD dependencies** — only depends on `Microsoft.Extensions.DependencyInjection.Abstractions` and `Microsoft.Extensions.Logging.Abstractions`
+- **Zero dependencies** — only depends on `Microsoft.Extensions.DependencyInjection.Abstractions` and `Microsoft.Extensions.Logging.Abstractions`
 
 ## Installation
 
