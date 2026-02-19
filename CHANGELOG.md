@@ -7,22 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.2] - 2026-02-20
-
-### Changed
-- Simplified README.md as a marketing-oriented NuGet landing page (detailed guides moved to docs site)
-- Publish workflow now derives package version from git tags instead of hardcoded `.csproj` value
-
-### Fixed
-- NuGet publish pipeline was silently skipping releases due to hardcoded `<Version>` in `.csproj` not matching git tags
-
 ## [0.1.1] - 2026-02-20
 
 ### Added
 - Custom exception hierarchy (`LocalizationException`, `LocalizationConfigurationException`, `LocalizationSerializationException`)
 - Struct `ILocalizable` support with `Nullable<T>` handling
 - JSON serialization converters for nullable struct localizable types
-- Struct attribute interaction and edge case tests (61 total)
 
 ### Fixed
 - Cached reflection in template formatting for improved performance
@@ -41,7 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DI integration via `IServiceCollection` extension methods
 - Comprehensive XML documentation
 
-[Unreleased]: https://github.com/bogoware/Localization/compare/v0.1.2...HEAD
-[0.1.2]: https://github.com/bogoware/Localization/compare/v0.1.1...v0.1.2
+[Unreleased]: https://github.com/bogoware/Localization/compare/v0.1.1...HEAD
 [0.1.1]: https://github.com/bogoware/Localization/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/bogoware/Localization/releases/tag/v0.1.0

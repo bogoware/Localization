@@ -46,11 +46,20 @@ Every development task MUST conclude with the following review agents run in par
 2. **Documentation Coherence & Coverage Review** — Verify documentation covers new/modified features, cross-references are consistent, and changelog is updated (`pr-review-toolkit:comment-analyzer` agent scoped to `docs/` + `README.md`)
 3. **Test QA Review** — Assess test quality, coverage gaps, missing edge cases, and confirm all tests pass (`pr-review-toolkit:pr-test-analyzer` agent scoped to `tests/`)
 
+## CHANGELOG Policy
+
+`CHANGELOG.md` tracks only changes that affect the **library itself** (API, behavior, dependencies, bug fixes). Do NOT add entries for:
+- Documentation changes (README, docs site, XML comments)
+- CI/CD workflow changes (GitHub Actions, build scripts)
+- Test-only changes (new tests, test refactors)
+- Cosmetic or formatting changes
+- Developer tooling or project configuration
+
 ## Pre-Release Checklist
 
 Before tagging a new version (`v*`) for publication, ALL of the following MUST be completed:
 
-1. **Update CHANGELOG.md** — Move items from `[Unreleased]` into a new version section following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. Include the release date. Update the comparison links at the bottom of the file.
+1. **Update CHANGELOG.md** — Move items from `[Unreleased]` into a new version section following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format. Include the release date. Update the comparison links at the bottom of the file. Only include library-affecting changes per the CHANGELOG Policy above.
 2. **All tests pass** — `dotnet test Bogoware.Localization.slnx` must report 0 failures on both target frameworks.
 3. **Zero compile warnings** — `dotnet build Bogoware.Localization.slnx` must produce 0 warnings (NuGet source mapping warnings NU1507 are excluded).
 4. **Post-task reviews completed** — The three review agents (code, docs, tests) from the Post-Task Review section must have run and their findings addressed.
