@@ -112,6 +112,24 @@ public class StructSelfProviderDto
     public StructSelfProvider? NullableProvider { get; set; }
 }
 
+public class StructExplicitModeDto
+{
+    public int Code { get; set; }
+
+    [Localize]
+    public StructRequiredFieldError? MarkedError { get; set; }
+
+    public StructRequiredFieldError? UnmarkedError { get; set; }
+}
+
+public class StructDoNotLocalizeDto
+{
+    public StructRequiredFieldError? Error { get; set; }
+
+    [DoNotLocalize]
+    public StructRequiredFieldError? RawError { get; set; }
+}
+
 // ──────────────────────── Tests ────────────────────────
 
 public class LocalizableJsonSerializationTests
@@ -642,5 +660,107 @@ public class LocalizableJsonSerializationTests
 
         Assert.Throws<LocalizationSerializationException>(() =>
             JsonSerializer.Deserialize<StructAutoModeDto>(json, options));
+    }
+
+    [Fact]
+    public void ExplicitMode_StructWithLocalizeAttribute_SerializesAsString()
+    {
+        var formatter = CreateFormatter(
+            r => r.Add<StructRequiredFieldError>("'{FieldName}' is required"));
+        var options = CreateOptions(formatter, LocalizationSerializationMode.Explicit);
+
+        var dto = new StructExplicitModeDto
+        {
+            Code = 400,
+            MarkedError = new StructRequiredFieldError("Email"),
+            UnmarkedError = new StructRequiredFieldError("Email")
+        };
+
+        var json = JsonSerializer.Serialize(dto, options);
+        using var doc = JsonDocument.Parse(json);
+
+        Assert.Equal(400, doc.RootElement.GetProperty("Code").GetInt32());
+        // MarkedError has [Localize] → localized string
+        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("MarkedError").GetString());
+        // UnmarkedError has no attribute → falls through to default STJ serialization (object)
+        Assert.Equal(JsonValueKind.Object, doc.RootElement.GetProperty("UnmarkedError").ValueKind);
+        Assert.Equal("Email", doc.RootElement.GetProperty("UnmarkedError").GetProperty("FieldName").GetString());
+    }
+
+    [Fact]
+    public void ExhaustiveMode_StructWithDoNotLocalize_SerializesAsObject()
+    {
+        var formatter = CreateFormatter(
+            r => r.Add<StructRequiredFieldError>("'{FieldName}' is required"));
+        var options = CreateOptions(formatter, LocalizationSerializationMode.Exhaustive);
+
+        var dto = new StructDoNotLocalizeDto
+        {
+            Error = new StructRequiredFieldError("Email"),
+            RawError = new StructRequiredFieldError("Email")
+        };
+
+        var json = JsonSerializer.Serialize(dto, options);
+        using var doc = JsonDocument.Parse(json);
+
+        // Error → localized string (ILocalizable, no [DoNotLocalize])
+        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("Error").GetString());
+        // RawError has [DoNotLocalize] → serialized as object even in Exhaustive mode
+        Assert.Equal(JsonValueKind.Object, doc.RootElement.GetProperty("RawError").ValueKind);
+        Assert.Equal("Email", doc.RootElement.GetProperty("RawError").GetProperty("FieldName").GetString());
+    }
+
+    [Fact]
+    public void AutoMode_EmptyCollection_SerializesAsEmptyArray()
+    {
+        var formatter = CreateFormatter();
+        var options = CreateOptions(formatter);
+
+        var dto = new AutoModeDto
+        {
+            StatusCode = 200,
+            Warnings = new List<ILocalizable>()
+        };
+
+        var json = JsonSerializer.Serialize(dto, options);
+        using var doc = JsonDocument.Parse(json);
+
+        var warnings = doc.RootElement.GetProperty("Warnings");
+        Assert.Equal(JsonValueKind.Array, warnings.ValueKind);
+        Assert.Equal(0, warnings.GetArrayLength());
+    }
+
+    [Fact]
+    public void Format_BoxedStructILocalizable_UsesRegistryTemplate()
+    {
+        var formatter = CreateFormatter(
+            r => r.Add<StructRequiredFieldError>("'{FieldName}' is required"));
+
+        ILocalizable boxed = new StructRequiredFieldError("Email");
+        var result = formatter.Format(boxed, CultureInfo.InvariantCulture);
+
+        Assert.Equal("'Email' is required", result);
+    }
+
+    [Fact]
+    public void AutoMode_CollectionWithBoxedStructElements_SerializesAsArrayOfStrings()
+    {
+        var formatter = CreateFormatter(
+            r => r.Add<StructRequiredFieldError>("'{FieldName}' is required"));
+        var options = CreateOptions(formatter);
+
+        var dto = new AutoModeDto
+        {
+            StatusCode = 400,
+            Warnings = [new StructRequiredFieldError("Email")]  // boxed to ILocalizable
+        };
+
+        var json = JsonSerializer.Serialize(dto, options);
+        using var doc = JsonDocument.Parse(json);
+
+        var warnings = doc.RootElement.GetProperty("Warnings");
+        Assert.Equal(JsonValueKind.Array, warnings.ValueKind);
+        Assert.Equal(1, warnings.GetArrayLength());
+        Assert.Equal("'Email' is required", warnings[0].GetString());
     }
 }
