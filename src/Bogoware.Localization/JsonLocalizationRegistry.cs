@@ -36,7 +36,16 @@ public class JsonLocalizationRegistry : ILocalizationRegistry
         if (!_templates.ContainsKey(key))
             _templates[key] = new Dictionary<string, string>();
 
-        var entries = JsonSerializer.Deserialize<Dictionary<string, string>>(json, JsoncOptions);
+        Dictionary<string, string>? entries;
+        try
+        {
+            entries = JsonSerializer.Deserialize<Dictionary<string, string>>(json, JsoncOptions);
+        }
+        catch (JsonException ex)
+        {
+            throw new LocalizationConfigurationException(
+                $"Failed to parse localization JSON for culture '{culture.Name}': {ex.Message}", ex);
+        }
         if (entries is null) return;
 
         foreach (var (fqdn, template) in entries)

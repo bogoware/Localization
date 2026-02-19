@@ -79,7 +79,16 @@ public class JsonLocalizationRegistryBuilder(ILogger? logger = null)
     /// <returns>This builder instance for fluent chaining.</returns>
     public JsonLocalizationRegistryBuilder AddFromFile(string path, CultureInfo culture)
     {
-        var json = File.ReadAllText(path);
+        string json;
+        try
+        {
+            json = File.ReadAllText(path);
+        }
+        catch (IOException ex)
+        {
+            throw new LocalizationConfigurationException(
+                $"Failed to read localization file '{path}': {ex.Message}", ex);
+        }
         logger?.LogDebug("Loading localization from file {Path} for culture '{Culture}'", path, culture.Name);
         _registry.LoadFromJson(json, culture);
         return this;

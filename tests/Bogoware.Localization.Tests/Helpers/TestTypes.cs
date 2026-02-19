@@ -115,3 +115,17 @@ public class NonLocalizableAddress
 
     public override string ToString() => $"{Street}, {City}";
 }
+
+/// <summary>
+/// Struct implementing ILocalizable for testing struct support (including Nullable&lt;T&gt;).
+/// Template placeholder: {FieldName}
+/// </summary>
+public readonly record struct StructRequiredFieldError(string FieldName) : ILocalizable;
+
+/// <summary>
+/// Struct implementing ILocalizationProvider (self-localizing) for testing struct self-provider support.
+/// </summary>
+public readonly record struct StructSelfProvider(string Value) : ILocalizationProvider
+{
+    public string Localize(CultureInfo? culture = null) => Value;
+}

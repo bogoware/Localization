@@ -70,7 +70,7 @@ internal static class LocalizableJsonModifier
         return mode switch
         {
             LocalizationSerializationMode.Explicit => hasLocalize,
-            LocalizationSerializationMode.Auto => hasLocalize || IsLocalizableType(propertyType),
+            LocalizationSerializationMode.Auto => hasLocalize || IsLocalizableType(underlyingType),
             LocalizationSerializationMode.Exhaustive => true,
             _ => false
         };
@@ -78,7 +78,8 @@ internal static class LocalizableJsonModifier
 
     private static bool IsLocalizableType(Type type)
     {
-        return typeof(ILocalizable).IsAssignableFrom(type) || IsEnumerableOfLocalizable(type);
+        var unwrapped = Nullable.GetUnderlyingType(type) ?? type;
+        return typeof(ILocalizable).IsAssignableFrom(unwrapped) || IsEnumerableOfLocalizable(unwrapped);
     }
 
     private static bool IsEnumerableOfLocalizable(Type type)
@@ -108,22 +109,36 @@ internal static class LocalizableJsonModifier
         CultureInfo? culture)
     {
         var propertyType = property.PropertyType;
+        var unwrappedType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
 
         // Check if the property is an IEnumerable<T> where T : ILocalizable
-        var elementType = GetEnumerableElementType(propertyType);
-        if (elementType is not null && typeof(ILocalizable).IsAssignableFrom(elementType))
+        var elementType = GetEnumerableElementType(unwrappedType);
+        if (elementType is not null)
         {
-            // Collection of localizables → array of localized strings
-            var collectionConverterType = typeof(LocalizableCollectionJsonConverter<>).MakeGenericType(elementType);
-            var collectionConverter = Activator.CreateInstance(collectionConverterType, formatter, culture)!;
-            property.CustomConverter = (System.Text.Json.Serialization.JsonConverter)collectionConverter;
-            return;
+            var unwrappedElement = Nullable.GetUnderlyingType(elementType) ?? elementType;
+            if (typeof(ILocalizable).IsAssignableFrom(unwrappedElement))
+            {
+                var collectionConverterType = typeof(LocalizableCollectionJsonConverter<>).MakeGenericType(unwrappedElement);
+                var collectionConverter = Activator.CreateInstance(collectionConverterType, formatter, culture)!;
+                property.CustomConverter = (System.Text.Json.Serialization.JsonConverter)collectionConverter;
+                return;
+            }
         }
 
         // Single value → localized string
-        var converterType = typeof(LocalizableJsonConverter<>).MakeGenericType(propertyType);
-        var converter = Activator.CreateInstance(converterType, formatter, culture)!;
-        property.CustomConverter = (System.Text.Json.Serialization.JsonConverter)converter;
+        if (propertyType != unwrappedType && unwrappedType.IsValueType)
+        {
+            // Nullable<T> struct → use the nullable-aware converter
+            var nullableConverterType = typeof(NullableLocalizableJsonConverter<>).MakeGenericType(unwrappedType);
+            var nullableConverter = Activator.CreateInstance(nullableConverterType, formatter, culture)!;
+            property.CustomConverter = (System.Text.Json.Serialization.JsonConverter)nullableConverter;
+        }
+        else
+        {
+            var converterType = typeof(LocalizableJsonConverter<>).MakeGenericType(unwrappedType);
+            var converter = Activator.CreateInstance(converterType, formatter, culture)!;
+            property.CustomConverter = (System.Text.Json.Serialization.JsonConverter)converter;
+        }
     }
 
     private static Type? GetEnumerableElementType(Type type)

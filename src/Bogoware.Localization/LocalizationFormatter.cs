@@ -82,8 +82,21 @@ public class LocalizationFormatter(
         var provider = serviceProvider.GetService(providerType);
         if (provider is null) return null;
 
-        var localizeMethod = _localizeMethodCache.GetOrAdd(providerType, t => t.GetMethod("Localize")!);
-        return (string)localizeMethod.Invoke(provider, [value, culture])!;
+        var localizeMethod = _localizeMethodCache.GetOrAdd(providerType, t =>
+            t.GetMethod(nameof(ILocalizationProvider<object>.Localize))
+            ?? throw new LocalizationFormattingException(
+                $"The localization provider type '{t.FullName}' does not expose a 'Localize' method.", t));
+
+        try
+        {
+            return (string)localizeMethod.Invoke(provider, [value, culture])!;
+        }
+        catch (TargetInvocationException ex) when (ex.InnerException is not null)
+        {
+            throw new LocalizationFormattingException(
+                $"The localization provider for type '{runtimeType.FullName}' threw an exception during formatting.",
+                ex.InnerException, runtimeType);
+        }
     }
 
     /// <summary>

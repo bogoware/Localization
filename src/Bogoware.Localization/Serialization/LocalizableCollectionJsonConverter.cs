@@ -11,7 +11,7 @@ namespace Bogoware.Localization.Serialization;
 /// <remarks>
 /// Each element is formatted via <see cref="ILocalizationFormatter.Format{T}"/>.
 /// Null elements are written as JSON <c>null</c>.
-/// Reading is not supported.
+/// Reading is not supported — deserialization throws <see cref="LocalizationSerializationException"/>.
 /// </remarks>
 /// <typeparam name="T">The element type.</typeparam>
 internal sealed class LocalizableCollectionJsonConverter<T>(
@@ -19,7 +19,7 @@ internal sealed class LocalizableCollectionJsonConverter<T>(
     CultureInfo? culture) : JsonConverter<IEnumerable<T>>
 {
     public override IEnumerable<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        => throw new NotSupportedException(
+        => throw new LocalizationSerializationException(
             $"Deserialization of localized collections is not supported. " +
             $"Type: {typeToConvert.FullName}");
 
