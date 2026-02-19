@@ -83,6 +83,16 @@ public class LocalizationFormatter(
         return (string)localizeMethod.Invoke(provider, [value, culture])!;
     }
 
+    /// <summary>
+    /// Replaces <c>{PropertyName}</c> placeholders in a template with values from the source object.
+    /// </summary>
+    /// <param name="template">The format template containing <c>{PropertyName}</c> placeholders.</param>
+    /// <param name="source">The object whose public instance properties supply placeholder values.</param>
+    /// <returns>The template with all matching placeholders replaced by property values.</returns>
+    /// <remarks>
+    /// Properties named <c>Message</c> are excluded from substitution. Only public readable
+    /// instance properties are considered. Unmatched placeholders are left as-is.
+    /// </remarks>
     internal static string FormatTemplate(string template, object source)
     {
         var props = source.GetType()
@@ -102,6 +112,16 @@ public class LocalizationFormatter(
         return result;
     }
 
+    /// <summary>
+    /// Produces a fallback string in the form <c>TypeName(Prop=val, ...)</c>.
+    /// </summary>
+    /// <param name="source">The object to describe.</param>
+    /// <returns>A diagnostic-style string representation.</returns>
+    /// <remarks>
+    /// Only public instance properties declared directly on the source type are included
+    /// (<see cref="BindingFlags.DeclaredOnly"/>), excluding any property named <c>Message</c>.
+    /// If no properties match, the type name alone is returned.
+    /// </remarks>
     internal static string BuildFallback(object source)
     {
         var typeName = source.GetType().Name;

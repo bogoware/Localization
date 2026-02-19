@@ -3,7 +3,7 @@ using System.Globalization;
 namespace Bogoware.Localization;
 
 /// <summary>
-/// A simple in-memory registry backed by a flat dictionary (FQDN -> format pattern).
+/// A simple in-memory registry backed by a flat dictionary (FQDN → format pattern).
 /// Culture-insensitive — always returns the registered template regardless of the requested culture.
 /// Intended for unit testing scenarios where culture fallback is not under test.
 /// </summary>
