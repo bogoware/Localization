@@ -1,0 +1,8 @@
+{
+  "Bogoware.Localization.Tests.Helpers.TestRequiredFieldError": "'{FieldName}' è obbligatorio",
+  "Bogoware.Localization.Tests.Helpers.TestInvalidEmailError": "'{FieldName}' non è un indirizzo email valido",
+  "Bogoware.Localization.Tests.Helpers.TestMaxLengthError": "'{FieldName}' non deve superare {MaxLength} caratteri",
+  "Bogoware.Localization.Tests.Helpers.TestMustBeGreaterThanError": "'{FieldName}' deve essere maggiore di {Min}",
+  "Bogoware.Localization.Tests.Helpers.TestOutOfRangeError": "'{FieldName}' deve essere compreso tra {Min} e {Max}",
+  "Bogoware.Localization.Tests.Helpers.TestInvalidFormatError": "'{FieldName}' non corrisponde al formato previsto: {ExpectedFormat}"
+}

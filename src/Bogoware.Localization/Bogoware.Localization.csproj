@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bogoware.Localization</AssemblyName>
+    <RootNamespace>Bogoware.Localization</RootNamespace>
+
+    <!-- NuGet package metadata -->
+    <PackageId>Bogoware.Localization</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Bogoware</Authors>
+    <Description>Lightweight, FQDN-keyed localization library for .NET with DI support, culture fallback chains, and pluggable providers.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Bogoware/Localization</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Bogoware/Localization</RepositoryUrl>
+    <PackageTags>localization;i18n;l10n;formatting;dotnet</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

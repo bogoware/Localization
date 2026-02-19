@@ -1,0 +1,34 @@
+# the name by which the project can be referenced within Serena
+project_name: "Bogoware Localization"
+
+languages:
+- csharp
+- yaml
+- bash
+
+# the encoding used by text files in the project
+encoding: "utf-8"
+
+# whether to use project's .gitignore files to ignore files
+ignore_all_files_in_gitignore: true
+
+# list of additional paths to ignore in this project.
+ignored_paths: []
+
+# whether the project is in read-only mode
+read_only: false
+
+# list of tool names to exclude.
+excluded_tools: []
+
+# list of tools to include that would otherwise be disabled
+included_optional_tools: []
+
+# fixed set of tools to use as the base tool set
+fixed_tools: []
+
+base_modes:
+
+default_modes:
+
+initial_prompt: ""

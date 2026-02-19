@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Bogoware.Localization/Bogoware.Localization.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Bogoware.Localization.Tests/Bogoware.Localization.Tests.csproj" />
+  </Folder>
+</Solution>
