@@ -9,7 +9,7 @@ public class JsonLocalizationRegistryTests
     private JsonLocalizationRegistry LoadTestRegistry()
     {
         var builder = new JsonLocalizationRegistryBuilder();
-        builder.AddFromAssemblyResources(typeof(JsonLocalizationRegistryTests).Assembly);
+        builder.AddFromAssembly(typeof(JsonLocalizationRegistryTests).Assembly);
         return builder.Build();
     }
 
@@ -23,7 +23,7 @@ public class JsonLocalizationRegistryTests
     // --- Registry builder tests ---
 
     [Fact]
-    public void AddFromAssemblyResources_LoadsTestTemplates()
+    public void AddFromAssembly_LoadsTestTemplates()
     {
         var registry = LoadTestRegistry();
 
@@ -35,7 +35,7 @@ public class JsonLocalizationRegistryTests
     }
 
     [Fact]
-    public void AddFromAssemblyResources_SupportsMultipleCultures()
+    public void AddFromAssembly_SupportsMultipleCultures()
     {
         var registry = LoadTestRegistry();
 
@@ -235,5 +235,29 @@ public class JsonLocalizationRegistryTests
 
         formatter.Format((ILocalizable)new TestRequiredFieldError("X"), new CultureInfo("en-US")).Should().Be("OVERRIDDEN");
         formatter.Format((ILocalizable)new TestRequiredFieldError("X"), new CultureInfo("it-IT")).Should().Be("'X' è obbligatorio");
+    }
+
+    // --- Record class tests ---
+
+    [Fact]
+    public void RecordClass_WithTemplate_FormatsCorrectly()
+    {
+        var formatter = CreateTestFormatter();
+
+        var error = new RecordRequiredFieldError("Email");
+        var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
+
+        result.Should().Be("'Email' is required");
+    }
+
+    [Fact]
+    public void RecordClass_SelfProvider_UsesLocalizeMethod()
+    {
+        var formatter = CreateTestFormatter();
+
+        var provider = new RecordSelfProvider("custom message");
+        var result = formatter.Format(provider, new CultureInfo("en-US"));
+
+        result.Should().Be("custom message");
     }
 }

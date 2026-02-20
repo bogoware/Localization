@@ -20,7 +20,7 @@ public sealed class CoexistenceSetupFixture : WebApplicationFactory<Program>
 
             // Bogoware localization
             services.AddBogowareLocalization(
-                registry: b => b.AddFromAssemblyResources(typeof(Program).Assembly),
+                registry: b => b.AddFromAssembly(typeof(Program).Assembly),
                 middleware: options =>
                 {
                     options.DefaultCulture = new CultureInfo("en-US");

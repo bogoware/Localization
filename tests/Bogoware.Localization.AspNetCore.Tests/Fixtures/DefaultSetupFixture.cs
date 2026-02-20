@@ -16,7 +16,7 @@ public sealed class DefaultSetupFixture : WebApplicationFactory<Program>
         {
             // Re-register with explicit cultures for test determinism
             services.AddBogowareLocalization(
-                registry: b => b.AddFromAssemblyResources(typeof(Program).Assembly),
+                registry: b => b.AddFromAssembly(typeof(Program).Assembly),
                 middleware: options =>
                 {
                     options.DefaultCulture = new CultureInfo("en-US");

@@ -1,0 +1,5 @@
+{
+  "Acme.Orders.OrderNotFound": "Order '{OrderId}' was not found in the system",
+  "Acme.Orders.PaymentFailed": "Payment for order '{OrderId}' failed: {Reason}",
+  "Acme.Orders.ItemOutOfStock": "Item '{ItemName}' is currently out of stock"
+}

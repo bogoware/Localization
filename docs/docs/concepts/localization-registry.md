@@ -51,6 +51,10 @@ Then register the assembly containing the resources:
 services.AddLocalization(typeof(MyType).Assembly);
 ```
 
+:::tip
+`AddLocalization` is additive — multiple calls accumulate templates, with later registrations overriding earlier ones on conflict. See the [Additive Configuration guide](../guides/additive-configuration.md) for details.
+:::
+
 ## In-Memory Registry
 
 The `InMemoryLocalizationRegistry` is a simple dictionary-backed registry, useful for testing:

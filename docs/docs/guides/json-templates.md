@@ -158,13 +158,13 @@ Both files are loaded automatically with a single call:
 
 ```csharp
 // Loads both localized-messages.*.json and error-messages.*.json
-builder.AddFromAssemblyResources(typeof(Program).Assembly);
+builder.AddFromAssembly(typeof(Program).Assembly);
 ```
 
 You can also add **custom file categories** (e.g. `notification-messages`) by supplying custom patterns:
 
 ```csharp
-builder.AddFromAssemblyResources(typeof(Program).Assembly,
+builder.AddFromAssembly(typeof(Program).Assembly,
     "localized-messages", "error-messages", "notification-messages");
 ```
 
@@ -191,13 +191,22 @@ For multi-project solutions, each assembly can own its own templates. Register t
 services.AddLocalization(typeof(OrderError).Assembly, typeof(AuthError).Assembly);
 ```
 
+Or use `AddFromAssemblyTree` to automatically scan an assembly and all its transitive dependencies:
+
+```csharp
+services.AddLocalization(builder =>
+{
+    builder.AddFromAssemblyTree(typeof(Program).Assembly);
+});
+```
+
 Or use `AddFromLoadedAssemblies` to scan all loaded assemblies whose name starts with given prefixes:
 
 ```csharp
 services.AddLocalization(builder =>
 {
     // Scans all loaded assemblies whose name starts with "MyApp."
-    builder.AddFromLoadedAssemblies("MyApp.");
+    builder.AddFromLoadedAssemblies(["MyApp."]);
 });
 ```
 
@@ -215,10 +224,10 @@ A common pattern is to ship base templates inside a shared library assembly and 
 services.AddLocalization(builder =>
 {
     // Layer 1: base templates from the shared library (embedded resources)
-    builder.AddFromAssemblyResources(typeof(SharedLib.Marker).Assembly);
+    builder.AddFromAssembly(typeof(SharedLib.Marker).Assembly);
 
     // Layer 2: base templates from this application
-    builder.AddFromAssemblyResources(typeof(Program).Assembly);
+    builder.AddFromAssembly(typeof(Program).Assembly);
 
     // Layer 3: runtime overrides loaded from disk (e.g. customer-specific wording)
     builder.AddFromFile("Localization/overrides.json", CultureInfo.InvariantCulture);
@@ -232,18 +241,31 @@ Because `overrides.json` is loaded last, any keys it defines will replace the em
 
 The `JsonLocalizationRegistryBuilder` provides several methods for loading templates. All methods return the builder instance for chaining.
 
-### AddFromAssemblyResources
+### AddFromAssembly
 
 Loads embedded resources from an assembly whose names contain one of the given patterns (or the defaults `localized-messages` and `error-messages`). Culture is extracted automatically from the filename.
 
 ```csharp
 // Use default patterns
-builder.AddFromAssemblyResources(typeof(Program).Assembly);
+builder.AddFromAssembly(typeof(Program).Assembly);
 
 // Use custom patterns
-builder.AddFromAssemblyResources(typeof(Program).Assembly,
+builder.AddFromAssembly(typeof(Program).Assembly,
     "localized-messages", "error-messages", "notification-messages");
 ```
+
+### AddFromAssemblyTree
+
+Scans the given assembly and all its transitive referenced assemblies. Dependencies are loaded in topological order (deepest first), so the root assembly's templates override its dependencies'. System assemblies (`System.*`, `Microsoft.*`, `netstandard`) are automatically excluded.
+
+```csharp
+builder.AddFromAssemblyTree(typeof(Program).Assembly);
+
+// With custom patterns
+builder.AddFromAssemblyTree(typeof(Program).Assembly, "notification-messages");
+```
+
+See [Additive Configuration](./additive-configuration.md) for layering semantics.
 
 ### AddFromFile
 
@@ -256,14 +278,17 @@ builder.AddFromFile("Resources/custom-messages.it-IT.json", new CultureInfo("it-
 
 ### AddFromLoadedAssemblies
 
-Scans all currently loaded assemblies whose `AssemblyName` starts with one of the given prefixes and loads their embedded resources using the default patterns. At least one prefix must be provided:
+Scans all currently loaded assemblies whose `AssemblyName` starts with one of the given prefixes and loads their embedded resources. The first parameter is a `string[]` of prefixes; optional additional `params string[]` patterns override the defaults:
 
 ```csharp
 // Load templates from all "MyApp.*" assemblies
-builder.AddFromLoadedAssemblies("MyApp.");
+builder.AddFromLoadedAssemblies(["MyApp."]);
 
 // Multiple prefixes
-builder.AddFromLoadedAssemblies("MyApp.", "MyCompany.Shared.");
+builder.AddFromLoadedAssemblies(["MyApp.", "MyCompany.Shared."]);
+
+// With custom resource patterns
+builder.AddFromLoadedAssemblies(["MyApp."], "notification-messages", "domain-messages");
 ```
 
 ### AddFromAssemblies
@@ -286,7 +311,7 @@ With the `Bogoware.Localization.AspNetCore` package, use `AddBogowareLocalizatio
 builder.Services.AddBogowareLocalization(
     registry: b =>
     {
-        b.AddFromAssemblyResources(typeof(Program).Assembly);
+        b.AddFromAssembly(typeof(Program).Assembly);
         b.AddFromFile("Localization/overrides.json", CultureInfo.InvariantCulture);
     });
 ```
@@ -305,8 +330,8 @@ All builder methods return the builder instance, so calls can be chained fluentl
 
 ```csharp
 services.AddLocalization(builder => builder
-    .AddFromLoadedAssemblies("MyApp.")
-    .AddFromAssemblyResources(typeof(Program).Assembly, "notification-messages")
+    .AddFromLoadedAssemblies(["MyApp."])
+    .AddFromAssembly(typeof(Program).Assembly, "notification-messages")
     .AddFromFile("Localization/overrides.json", CultureInfo.InvariantCulture)
     .AddFromFile("Localization/overrides.it-IT.json", new CultureInfo("it-IT")));
 ```

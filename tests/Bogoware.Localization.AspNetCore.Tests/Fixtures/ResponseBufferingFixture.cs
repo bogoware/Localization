@@ -15,7 +15,7 @@ public sealed class ResponseBufferingFixture : WebApplicationFactory<Program>
         builder.ConfigureServices(services =>
         {
             services.AddBogowareLocalization(
-                registry: b => b.AddFromAssemblyResources(typeof(Program).Assembly),
+                registry: b => b.AddFromAssembly(typeof(Program).Assembly),
                 middleware: options =>
                 {
                     options.DefaultCulture = new CultureInfo("en-US");

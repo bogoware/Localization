@@ -32,7 +32,7 @@ public static class BogowareLocalizationExtensions
     /// <example>
     /// <code>
     /// builder.Services.AddBogowareLocalization(
-    ///     registry: b => b.AddFromAssemblyResources(typeof(Program).Assembly),
+    ///     registry: b => b.AddFromAssembly(typeof(Program).Assembly),
     ///     middleware: options =>
     ///     {
     ///         options.DefaultCulture = new CultureInfo("en-US");
@@ -50,7 +50,7 @@ public static class BogowareLocalizationExtensions
         Action<BogowareLocalizationMiddlewareOptions>? middleware = null)
     {
         // Layer 0: core library DI (ILocalizationRegistry + ILocalizationFormatter)
-        // Always re-register so the last call's registry wins.
+        // Additive: each call appends to the registry builder; later templates override earlier ones.
         services.AddLocalization(registry);
 
         // Middleware options — Configure merges; last call's delegate wins for each property.
@@ -91,7 +91,7 @@ public static class BogowareLocalizationExtensions
             registry: builder =>
             {
                 foreach (var assembly in assemblies)
-                    builder.AddFromAssemblyResources(assembly);
+                    builder.AddFromAssembly(assembly);
             });
     }
 
@@ -111,7 +111,7 @@ public static class BogowareLocalizationExtensions
             registry: builder =>
             {
                 foreach (var assembly in assemblies)
-                    builder.AddFromAssemblyResources(assembly);
+                    builder.AddFromAssembly(assembly);
             },
             middleware: middleware);
     }

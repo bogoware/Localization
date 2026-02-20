@@ -75,7 +75,7 @@ curl -H "Accept-Language: it-IT" http://localhost:5000/api/orders/42
 builder.Services.AddBogowareLocalization(
     registry: b =>
     {
-        b.AddFromAssemblyResources(typeof(Program).Assembly);
+        b.AddFromAssembly(typeof(Program).Assembly);
         b.AddFromFile("path/to/custom-messages.json", new CultureInfo("en-US"));
     },
     middleware: options =>
@@ -100,14 +100,14 @@ builder.Services.AddBogowareLocalization(
     registry: b =>
     {
         // Scan embedded resources from one or more assemblies
-        b.AddFromAssemblyResources(typeof(Program).Assembly);
+        b.AddFromAssembly(typeof(Program).Assembly);
 
         // Load additional JSON files manually
         b.AddFromFile("Resources/custom-messages.json", CultureInfo.InvariantCulture);
         b.AddFromFile("Resources/custom-messages.it.json", new CultureInfo("it-IT"));
 
         // Scan all loaded assemblies with prefix filter
-        b.AddFromLoadedAssemblies("MyCompany.");
+        b.AddFromLoadedAssemblies(["MyCompany."]);
     });
 ```
 
@@ -238,7 +238,7 @@ using Bogoware.Localization.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddBogowareLocalization(
-    registry: b => b.AddFromAssemblyResources(typeof(Program).Assembly),
+    registry: b => b.AddFromAssembly(typeof(Program).Assembly),
     middleware: options =>
     {
         options.DefaultCulture = new CultureInfo("en-US");

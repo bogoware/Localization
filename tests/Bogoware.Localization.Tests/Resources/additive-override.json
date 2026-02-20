@@ -1,0 +1,4 @@
+{
+  "Acme.Orders.OrderNotFound": "Sorry, we couldn't find order '{OrderId}'",
+  "Acme.Orders.ShippingDelayed": "Shipping for order '{OrderId}' has been delayed"
+}

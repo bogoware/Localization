@@ -18,29 +18,41 @@ public class LocalizationFormatter(
     public string Format(ILocalizable value, CultureInfo? culture = null)
     {
         culture ??= CultureInfo.CurrentUICulture;
+        var runtimeType = value.GetType();
+        var typeName = runtimeType.FullName!;
+
+        if (logger is not null)
+            Log.ResolvingLocalization(logger, typeName, culture.Name);
 
         // 1. Self-provider
         if (value is ILocalizationProvider selfProvider)
         {
+            if (logger is not null)
+                Log.ResolvedVia(logger, typeName, "self-provider");
             return selfProvider.Localize(culture);
         }
 
         // 2. DI provider for runtime type
-        var runtimeType = value.GetType();
         var diResult = TryFormatViaDiProvider(runtimeType, value, culture);
         if (diResult is not null)
         {
+            if (logger is not null)
+                Log.ResolvedVia(logger, typeName, "DI provider");
             return diResult;
         }
 
         // 3. Registry template
-        var fqdn = runtimeType.FullName!;
+        var fqdn = typeName;
         if (registry.TryGetTemplate(fqdn, culture, out var template))
         {
+            if (logger is not null)
+                Log.ResolvedVia(logger, typeName, "registry template");
             return FormatTemplate(template, value);
         }
 
         // 4. Fallback
+        if (logger is not null)
+            Log.FallbackUsed(logger, typeName);
         return BuildFallback(value);
     }
 
@@ -62,15 +74,16 @@ public class LocalizationFormatter(
             var diResult = TryFormatViaDiProvider(runtimeType, value, culture);
             if (diResult is not null)
             {
+                if (logger is not null)
+                    Log.ResolvedVia(logger, runtimeType.FullName ?? "unknown", "DI provider (generic)");
                 return diResult;
             }
         }
 
         // 3. ToString fallback + warning
         var result = value?.ToString() ?? "";
-        logger?.LogWarning(
-            "No localization found for type {TypeName}, falling back to ToString()",
-            value?.GetType().FullName ?? "null");
+        if (logger is not null)
+            Log.FallbackUsed(logger, value?.GetType().FullName ?? "null");
         return result;
     }
 

@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ── Bogoware Localization Setup ──────────────────────────────────────
 builder.Services.AddBogowareLocalization(
-    registry: b => b.AddFromAssemblyResources(typeof(Program).Assembly),
+    registry: b => b.AddFromAssembly(typeof(Program).Assembly),
     middleware: options =>
     {
         options.DefaultCulture = new CultureInfo("en-US");

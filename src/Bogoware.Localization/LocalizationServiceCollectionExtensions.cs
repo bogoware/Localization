@@ -12,7 +12,9 @@ public static class LocalizationServiceCollectionExtensions
 {
     /// <summary>
     /// Registers the localization system with full builder customization.
-    /// The builder receives an <see cref="ILogger"/> from the service provider at resolution time.
+    /// Multiple calls are <b>additive</b>: each call appends its configuration delegate
+    /// to the builder pipeline. All delegates execute in registration order at resolution time,
+    /// so later templates override earlier ones on a per-key/per-culture basis.
     /// </summary>
     /// <param name="services">The service collection to add to.</param>
     /// <param name="configure">
@@ -27,28 +29,39 @@ public static class LocalizationServiceCollectionExtensions
     /// <code>
     /// // In Program.cs:
     /// builder.Services.AddLocalization(b => b
-    ///     .AddFromAssemblyResources(typeof(Program).Assembly)
-    ///     .AddFromLoadedAssemblies("MyApp"));
+    ///     .AddFromAssembly(typeof(Program).Assembly)
+    ///     .AddFromLoadedAssemblies(["MyApp"]));
     /// </code>
     /// </example>
     public static IServiceCollection AddLocalization(
         this IServiceCollection services, Action<JsonLocalizationRegistryBuilder> configure)
     {
-        services.AddSingleton<ILocalizationRegistry>(sp =>
-        {
-            var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<JsonLocalizationRegistryBuilder>();
-            var builder = new JsonLocalizationRegistryBuilder(logger);
-            configure(builder);
-            return builder.Build();
-        });
+        // Retrieve or create the configurator that accumulates builder delegates.
+        var configurator = (LocalizationRegistryConfigurator?)services
+            .FirstOrDefault(d => d.ServiceType == typeof(LocalizationRegistryConfigurator))
+            ?.ImplementationInstance;
 
-        services.AddSingleton<ILocalizationFormatter>(sp =>
+        if (configurator is null)
         {
-            var registry = sp.GetRequiredService<ILocalizationRegistry>();
-            var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<LocalizationFormatter>();
-            return new LocalizationFormatter(registry, sp, logger);
-        });
+            configurator = new LocalizationRegistryConfigurator();
+            services.AddSingleton(configurator);
 
+            services.AddSingleton<ILocalizationRegistry>(sp =>
+            {
+                var cfg = sp.GetRequiredService<LocalizationRegistryConfigurator>();
+                var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<JsonLocalizationRegistryBuilder>();
+                return cfg.Build(logger);
+            });
+
+            services.AddSingleton<ILocalizationFormatter>(sp =>
+            {
+                var registry = sp.GetRequiredService<ILocalizationRegistry>();
+                var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<LocalizationFormatter>();
+                return new LocalizationFormatter(registry, sp, logger);
+            });
+        }
+
+        configurator.Add(configure);
         return services;
     }
 
@@ -64,7 +77,7 @@ public static class LocalizationServiceCollectionExtensions
         return services.AddLocalization(builder =>
         {
             foreach (var assembly in assemblies)
-                builder.AddFromAssemblyResources(assembly);
+                builder.AddFromAssembly(assembly);
         });
     }
 }
