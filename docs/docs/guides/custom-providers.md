@@ -71,4 +71,5 @@ Return `null` from a DI provider to let the resolution chain continue to the reg
 | Static, template-based strings | JSON templates |
 | Dynamic content (database, API) | `ILocalizationProvider` |
 | Type-specific logic with DI dependencies | `ILocalizationProvider<T>` |
+| Generic types (e.g. `Result<T>`) | `ILocalizationProvider` or `ILocalizationProvider<T>` |
 | Testing | `InMemoryLocalizationRegistry` |

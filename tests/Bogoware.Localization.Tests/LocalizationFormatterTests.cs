@@ -229,4 +229,58 @@ public class LocalizationFormatterTests
         formatter.Format(error, new CultureInfo("it-IT")).Should().Be("'Email' is required");
         formatter.Format(error, CultureInfo.InvariantCulture).Should().Be("'Email' is required");
     }
+
+    // --- Generic type FQDN key resolution ---
+
+    [Fact]
+    public void Format_GenericType_InMemoryRegistry_FormatsWithPlaceholders()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder()
+            .Add<GenericResult<string>>("Result: {Value} (code {Code})")
+            .Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var result = formatter.Format(new GenericResult<string>("OK", 200));
+
+        result.Should().Be("Result: OK (code 200)");
+    }
+
+    [Fact]
+    public void Format_GenericType_NoTemplate_BuildsFallback()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder().Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var result = formatter.Format(new GenericResult<string>("OK", 200));
+
+        result.Should().Contain("GenericResult`1");
+        result.Should().Contain("Value=OK");
+        result.Should().Contain("Code=200");
+    }
+
+    [Fact]
+    public void GenericType_FullName_ContainsBacktickAndAssemblyQualifiedArgs()
+    {
+        var fullName = typeof(GenericResult<string>).FullName!;
+
+        // Generic FQDN contains backtick notation for arity
+        fullName.Should().Contain("`1");
+        // Generic FQDN contains assembly-qualified type arguments in double brackets
+        fullName.Should().Contain("[[System.String,");
+    }
+
+    [Fact]
+    public void Format_GenericType_DifferentTypeArgs_ResolveDifferentTemplates()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder()
+            .Add<GenericResult<string>>("String result: {Value} ({Code})")
+            .Add<GenericResult<int>>("Int result: {Value} ({Code})")
+            .Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        formatter.Format(new GenericResult<string>("OK", 200))
+            .Should().Be("String result: OK (200)");
+        formatter.Format(new GenericResult<int>(42, 404))
+            .Should().Be("Int result: 42 (404)");
+    }
 }

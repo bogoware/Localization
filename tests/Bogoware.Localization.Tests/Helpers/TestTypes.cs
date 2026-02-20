@@ -157,6 +157,16 @@ public class NonLocalizableOrderProvider : ILocalizationProvider<NonLocalizableO
 }
 
 /// <summary>
+/// Generic localizable type for testing generic FQDN key resolution.
+/// Template placeholders: {Value}, {Code}
+/// </summary>
+public class GenericResult<T>(T value, int code) : ILocalizable
+{
+    public T Value { get; } = value;
+    public int Code { get; } = code;
+}
+
+/// <summary>
 /// ILocalizable with a nullable property, for testing FormatTemplate null property handling.
 /// Template placeholder: {FieldName}, {Details}
 /// </summary>
