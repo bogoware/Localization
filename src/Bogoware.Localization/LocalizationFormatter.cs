@@ -117,6 +117,7 @@ public class LocalizationFormatter(
     /// </summary>
     /// <param name="template">The format template containing <c>{PropertyName}</c> placeholders.</param>
     /// <param name="source">The object whose public instance properties supply placeholder values.</param>
+    /// <param name="culture">The culture to use when recursively formatting nested <see cref="ILocalizable"/> values.</param>
     /// <returns>The template with all matching placeholders replaced by property values.</returns>
     /// <remarks>
     /// Properties named <c>Message</c> are excluded from substitution. Only public readable
@@ -152,6 +153,7 @@ public class LocalizationFormatter(
     /// Produces a fallback string in the form <c>TypeName(Prop=val, ...)</c>.
     /// </summary>
     /// <param name="source">The object to describe.</param>
+    /// <param name="culture">The culture to use when recursively formatting nested <see cref="ILocalizable"/> values.</param>
     /// <returns>A diagnostic-style string representation.</returns>
     /// <remarks>
     /// Only public instance properties declared directly on the source type are included

@@ -256,3 +256,32 @@ public class TestTransactionError(string transactionId, TestPaymentError payment
     public string TransactionId { get; } = transactionId;
     public TestPaymentError Payment { get; } = payment;
 }
+
+/// <summary>
+/// Self-localizing nested detail for testing self-provider resolution in nested localization.
+/// Implements both ILocalizable (so the outer formatter recognizes it) and ILocalizationProvider (self-provider).
+/// </summary>
+public class TestNestedSelfProviderDetail(string code) : ILocalizable, ILocalizationProvider
+{
+    public string Code { get; } = code;
+    public string Localize(CultureInfo? culture = null) => $"self:{Code}";
+}
+
+/// <summary>
+/// Outer localizable type containing a self-provider nested detail.
+/// Template placeholders: {FieldName}, {Detail}
+/// </summary>
+public class TestOuterWithSelfProviderDetail(string fieldName, TestNestedSelfProviderDetail detail) : ILocalizable
+{
+    public string FieldName { get; } = fieldName;
+    public TestNestedSelfProviderDetail Detail { get; } = detail;
+}
+
+/// <summary>
+/// DI provider for TestInvalidCurrencyError, used to test DI provider resolution in nested localization.
+/// </summary>
+public class TestInvalidCurrencyDiProvider : ILocalizationProvider<TestInvalidCurrencyError>
+{
+    public string Localize(TestInvalidCurrencyError value, CultureInfo? culture = null)
+        => $"DI:{value.CurrencyCode}";
+}

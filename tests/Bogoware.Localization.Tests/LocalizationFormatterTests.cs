@@ -371,4 +371,70 @@ public class LocalizationFormatterTests
 
         result.Should().Be("TestPaymentError(FieldName=Amount, Detail=TestInvalidCurrencyError(CurrencyCode=XYZ))");
     }
+
+    // --- Nested localization: inner self-provider ---
+
+    [Fact]
+    public void Format_NestedLocalizable_InnerSelfProvider_UsesLocalize()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder()
+            .Add<TestOuterWithSelfProviderDetail>("Field '{FieldName}': {Detail}")
+            .Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var error = new TestOuterWithSelfProviderDetail("Amount", new TestNestedSelfProviderDetail("XYZ"));
+        var result = formatter.Format(error);
+
+        result.Should().Be("Field 'Amount': self:XYZ");
+    }
+
+    [Fact]
+    public void Format_NestedLocalizable_InnerSelfProvider_OuterFallback()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder().Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var error = new TestOuterWithSelfProviderDetail("Amount", new TestNestedSelfProviderDetail("XYZ"));
+        var result = formatter.Format(error);
+
+        result.Should().Be("TestOuterWithSelfProviderDetail(FieldName=Amount, Detail=self:XYZ)");
+    }
+
+    // --- Nested localization: inner DI provider ---
+
+    [Fact]
+    public void Format_NestedLocalizable_InnerDiProvider_UsesProvider()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder()
+            .Add<TestPaymentError>("Payment field '{FieldName}' is invalid: {Detail}")
+            .Build();
+        var services = new ServiceCollection();
+        services.AddSingleton<ILocalizationProvider<TestInvalidCurrencyError>>(
+            new TestInvalidCurrencyDiProvider());
+        var sp = services.BuildServiceProvider();
+
+        var formatter = new LocalizationFormatter(registry, sp);
+
+        var error = new TestPaymentError("Amount", new TestInvalidCurrencyError("XYZ"));
+        var result = formatter.Format(error);
+
+        result.Should().Be("Payment field 'Amount' is invalid: DI:XYZ");
+    }
+
+    [Fact]
+    public void Format_NestedLocalizable_InnerDiProvider_OuterFallback()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder().Build();
+        var services = new ServiceCollection();
+        services.AddSingleton<ILocalizationProvider<TestInvalidCurrencyError>>(
+            new TestInvalidCurrencyDiProvider());
+        var sp = services.BuildServiceProvider();
+
+        var formatter = new LocalizationFormatter(registry, sp);
+
+        var error = new TestPaymentError("Amount", new TestInvalidCurrencyError("XYZ"));
+        var result = formatter.Format(error);
+
+        result.Should().Be("TestPaymentError(FieldName=Amount, Detail=DI:XYZ)");
+    }
 }
