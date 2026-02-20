@@ -2,7 +2,7 @@
 
 ![Nuget](https://img.shields.io/nuget/dt/Bogoware.Localization?logo=nuget&style=plastic) ![Nuget](https://img.shields.io/nuget/v/Bogoware.Localization?style=plastic) [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://bogoware.github.io/Localization/)
 
-Type-safe, FQDN-keyed localization for .NET — define localizable types, load JSON templates, and let the formatter resolve culture-aware messages with zero boilerplate.
+A .NET localization library where **each message is a class** — its name is the key, its properties are the placeholders. No magic strings, no naming conventions to memorize, no resource files to keep in sync.
 
 **Supported Platforms:** .NET 8 | .NET 10
 
@@ -10,16 +10,27 @@ Type-safe, FQDN-keyed localization for .NET — define localizable types, load J
 
 ## Why Bogoware.Localization?
 
-**Type-safe by design.** Templates are keyed by fully-qualified type names and bound to real .NET types — not magic strings. Rename a class and the compiler tells you; property placeholders resolve from the actual object at runtime.
+Most localization frameworks start with a string key — `"errors.required_field"` — and a separately maintained template — `"{0} is required"`. You pick the key by convention, match positional arguments by hand, and hope everything stays consistent across languages and refactors.
 
-**Zero-config simplicity.** One DI call registers everything. Culture fallback walks from exact culture to parent to invariant automatically. Swap providers, add registries, or supply your own resolution logic without touching the rest of your code.
+**What if the message itself were a type?**
+
+```csharp
+public class RequiredFieldError(string fieldName) : ILocalizable
+{
+    public string FieldName { get; } = fieldName;
+}
+```
+
+The fully-qualified type name *is* the key. The properties *are* the placeholders. Rename a class and the compiler tells you; rename a property and the template follows. There is nothing to keep in sync by hand.
+
+This is a well-established idea — types as messages — applied to localization. The result is a system that is **type-safe by design** and **simple by default**: one DI call registers everything, culture fallback works automatically, and you can swap providers without touching the rest of your code.
 
 ## Key Features
 
-- **FQDN-keyed templates** — tied to real types (classes and structs), not magic strings
+- **Class-based message modeling** — the type name is the key, properties are the placeholders
 - **Culture fallback chain** — exact → parent → invariant, automatic
 - **Multi-level provider resolution** — self, DI, registry, fallback
-- **JSON registry** — load from embedded resources, files, or raw strings
+- **JSON registry** — load templates from embedded resources, files, or raw strings
 - **JSON serialization converters** — localize properties during serialization
 - **ASP.NET Core integration** — per-request culture resolution, automatic JSON response localization, and ProblemDetails support via [Bogoware.Localization.AspNetCore](https://www.nuget.org/packages/Bogoware.Localization.AspNetCore)
 - **DI integration** — single-call setup via `IServiceCollection`
@@ -32,18 +43,19 @@ dotnet add package Bogoware.Localization
 ```
 
 ```csharp
-// Define a localizable type
+// 1. Define a localizable type — this *is* the message
 public class RequiredFieldError(string fieldName) : ILocalizable
 {
     public string FieldName { get; } = fieldName;
 }
 
-// Register with one DI call (scans assembly for JSON templates)
+// 2. Register with one DI call (scans assembly for JSON templates)
 services.AddLocalization(typeof(RequiredFieldError).Assembly);
 
-// Format — culture fallback is automatic
+// 3. Format — culture fallback is automatic
 var message = formatter.Format(new RequiredFieldError("Email"));
-// With JSON templates: "'Email' is required" (en-US), "'Email' è obbligatorio" (it-IT)
+// → "'Email' is required" (en-US)
+// → "'Email' è obbligatorio" (it-IT)
 ```
 
 ## Learn More

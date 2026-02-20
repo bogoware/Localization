@@ -8,11 +8,17 @@ title: Introduction
 
 ![Nuget](https://img.shields.io/nuget/dt/Bogoware.Localization?logo=nuget&style=plastic) ![Nuget](https://img.shields.io/nuget/v/Bogoware.Localization?style=plastic)
 
-_Lightweight, FQDN-keyed localization library for .NET with DI support, culture fallback chains, and pluggable providers._
+_A .NET localization library where **each message is a class** — its name is the key, its properties are the placeholders._
 
 **Supported Platforms:** .NET 8 | .NET 10
 
 [Changelog](./changelog) | [NuGet Package](https://www.nuget.org/packages/Bogoware.Localization) | [GitHub Repository](https://github.com/bogoware/Localization)
+
+## Why?
+
+String-based localization keys are fragile. You pick `"errors.required_field"` by convention, match `{0}` placeholders by position, and maintain separate resource files that drift out of sync with every refactor.
+
+Bogoware.Localization takes a different approach: **define a class, and you've defined a message**. The fully-qualified type name becomes the lookup key. The properties become the template placeholders. Rename either one and the compiler catches it — no conventions to memorize, no resource files to keep aligned by hand. It's a well-established idea — types as messages — applied to localization.
 
 ## Quick Start
 
@@ -69,13 +75,14 @@ var message = formatter.Format(error);
 
 ## Key Features
 
-- **FQDN-keyed templates** — map any type's `FullName` to a localized format string with property placeholders
+- **Class-based message modeling** — the type name is the key, properties are the placeholders
 - **Culture fallback chain** — exact culture → parent culture → invariant culture
-- **Resolution chain** — self-provider → DI provider → registry template → fallback message → default format
+- **Resolution chain** — self-provider → DI provider → registry template → fallback format
 - **JSON registry** — load templates from embedded resources, files, or raw JSON strings
+- **JSON serialization converters** — localize properties during serialization
 - **DI integration** — `IServiceCollection.AddLocalization()` extension methods
 - **ASP.NET Core integration** — per-request culture resolution, JSON response localization, and ProblemDetails support via `Bogoware.Localization.AspNetCore`
-- **Zero DDD dependencies** — only depends on `Microsoft.Extensions.DependencyInjection.Abstractions` and `Microsoft.Extensions.Logging.Abstractions`
+- **Near-zero dependencies (core)** — only depends on `Microsoft.Extensions.DependencyInjection.Abstractions` and `Microsoft.Extensions.Logging.Abstractions`
 
 ## Next Steps
 
