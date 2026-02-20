@@ -6,7 +6,7 @@ Type-safe, FQDN-keyed localization for .NET — define localizable types, load J
 
 **Supported Platforms:** .NET 8 | .NET 10
 
-[Documentation](https://bogoware.github.io/Localization/) | [CHANGELOG](https://github.com/Bogoware/Localization/blob/rel/prod/CHANGELOG.md) | [NuGet Package](https://www.nuget.org/packages/Bogoware.Localization)
+[Documentation](https://bogoware.github.io/Localization/) | [CHANGELOG](https://github.com/Bogoware/Localization/blob/rel/prod/CHANGELOG.md) | [NuGet: Core](https://www.nuget.org/packages/Bogoware.Localization) | [NuGet: AspNetCore](https://www.nuget.org/packages/Bogoware.Localization.AspNetCore)
 
 ## Why Bogoware.Localization?
 
@@ -21,8 +21,9 @@ Type-safe, FQDN-keyed localization for .NET — define localizable types, load J
 - **Multi-level provider resolution** — self, DI, registry, fallback
 - **JSON registry** — load from embedded resources, files, or raw strings
 - **JSON serialization converters** — localize properties during serialization
+- **ASP.NET Core integration** — per-request culture resolution, automatic JSON response localization, and ProblemDetails support via [Bogoware.Localization.AspNetCore](https://www.nuget.org/packages/Bogoware.Localization.AspNetCore)
 - **DI integration** — single-call setup via `IServiceCollection`
-- **Near-zero dependencies** — only `Microsoft.Extensions.DependencyInjection.Abstractions` and `Microsoft.Extensions.Logging.Abstractions`
+- **Near-zero dependencies (core)** — only `Microsoft.Extensions.DependencyInjection.Abstractions` and `Microsoft.Extensions.Logging.Abstractions`
 
 ## Getting Started
 

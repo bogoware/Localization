@@ -52,7 +52,9 @@ jobs:
         run: dotnet test Bogoware.Localization.slnx --no-build --verbosity normal -c Release
 
       - name: Pack
-        run: dotnet pack src/Bogoware.Localization/Bogoware.Localization.csproj --output ${{ env.NuGetDirectory }} -c Release --no-build /p:Version=${{ steps.version.outputs.PACKAGE_VERSION }}
+        run: |
+          dotnet pack src/Bogoware.Localization/Bogoware.Localization.csproj --output ${{ env.NuGetDirectory }} -c Release --no-build /p:Version=${{ steps.version.outputs.PACKAGE_VERSION }}
+          dotnet pack src/Bogoware.Localization.AspNetCore/Bogoware.Localization.AspNetCore.csproj --output ${{ env.NuGetDirectory }} -c Release --no-build /p:Version=${{ steps.version.outputs.PACKAGE_VERSION }}
 
       - uses: actions/upload-artifact@v4
         with:
