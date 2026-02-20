@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-02-20
+
+### Added
+- Additive `AddLocalization` — multiple calls now accumulate configuration delegates instead of replacing the registry; later templates override earlier ones on a per-key/per-culture basis
+- `AddFromAssemblyTree` method for scanning an assembly and all its transitive referenced assemblies with topological ordering (dependencies first, root last)
+- `[LoggerMessage]` source-generated logging throughout the library: resource loading, assembly scanning, template override warnings, and resolution chain tracing
+- Override detection: `Warning`-level log when a template key is replaced, including source descriptor for diagnostics
+- `source` parameter on `LoadFromJson` for tracking template origin (`assembly:Name:Resource`, `file:path`, `inline`)
+
+### Changed
+- **Breaking:** `AddFromAssemblyResources` renamed to `AddFromAssembly`
+- **Breaking:** `AddFromLoadedAssemblies` signature changed from `params string[] prefixes` to `string[] prefixes, params string[] patterns`
+- `JsonLocalizationRegistry` now accepts an optional `ILogger?` constructor parameter for diagnostic logging
+
 ## [0.2.0] - 2026-02-20
 
 ### Added
@@ -37,7 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DI integration via `IServiceCollection` extension methods
 - Comprehensive XML documentation
 
-[Unreleased]: https://github.com/bogoware/Localization/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/bogoware/Localization/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/bogoware/Localization/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/bogoware/Localization/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/bogoware/Localization/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/bogoware/Localization/releases/tag/v0.1.0
