@@ -251,6 +251,17 @@ public class JsonLocalizationRegistryTests
     }
 
     [Fact]
+    public void RecordClass_WithTemplate_FormatsCorrectly_ItIt()
+    {
+        var formatter = CreateTestFormatter();
+
+        var error = new RecordRequiredFieldError("Email");
+        var result = formatter.Format((ILocalizable)error, new CultureInfo("it-IT"));
+
+        result.Should().Be("'Email' è obbligatorio");
+    }
+
+    [Fact]
     public void RecordClass_SelfProvider_UsesLocalizeMethod()
     {
         var formatter = CreateTestFormatter();

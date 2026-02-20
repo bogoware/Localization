@@ -131,6 +131,20 @@ public readonly record struct StructSelfProvider(string Value) : ILocalizationPr
 }
 
 /// <summary>
+/// Record class implementing ILocalizable for testing record class support.
+/// Template placeholder: {FieldName}
+/// </summary>
+public record RecordRequiredFieldError(string FieldName) : ILocalizable;
+
+/// <summary>
+/// Record class implementing ILocalizationProvider (self-localizing) for testing record class self-provider support.
+/// </summary>
+public record RecordSelfProvider(string Value) : ILocalizationProvider
+{
+    public string Localize(CultureInfo? culture = null) => Value;
+}
+
+/// <summary>
 /// A DI provider that throws during Localize, for testing exception wrapping in TryFormatViaDiProvider.
 /// </summary>
 public class ThrowingDiProvider : ILocalizationProvider<TestLocalizable>
