@@ -164,25 +164,18 @@ options.AddLocalization(formatter, culture: new CultureInfo("it-IT"));
 In ASP.NET, leave `culture` as `null` (the default) so that request-level culture middleware controls the output language automatically.
 :::
 
-## ASP.NET Integration
+## ASP.NET Core Integration
 
-Configure localized JSON serialization in your ASP.NET pipeline:
+For ASP.NET Core applications, use the dedicated `Bogoware.Localization.AspNetCore` package which configures everything automatically — per-request culture resolution, JSON serialization, and ProblemDetails localization:
 
 ```csharp
-builder.Services.AddLocalization(typeof(MyErrors).Assembly);
+builder.Services.AddBogowareLocalization(typeof(Program).Assembly);
 
-builder.Services.AddControllers()
-    .AddJsonOptions(opts =>
-    {
-        var formatter = builder.Services.BuildServiceProvider()
-            .GetRequiredService<ILocalizationFormatter>();
-        opts.JsonSerializerOptions.AddLocalization(formatter);
-    });
+var app = builder.Build();
+app.UseBogowareLocalization();
 ```
 
-:::tip
-A dedicated ASP.NET integration package with first-class middleware support is planned for a future release.
-:::
+See the [ASP.NET Core Integration](./aspnetcore-integration) guide for full configuration options, culture resolution, ProblemDetails support, and coexistence with framework localization.
 
 ## Important Notes
 

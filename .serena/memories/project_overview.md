@@ -17,13 +17,17 @@
 - `dotnet pack src/Bogoware.Localization/Bogoware.Localization.csproj --configuration Release`
 
 ## Structure
-- `src/Bogoware.Localization/` - Library source
+- `src/Bogoware.Localization/` - Core library source
 - `src/Bogoware.Localization/Serialization/` - JSON serialization converters and modifiers
-- `tests/Bogoware.Localization.Tests/` - xUnit tests
-- `tests/Bogoware.Localization.Tests/Helpers/` - Test types
-- `tests/Bogoware.Localization.Tests/Resources/` - Embedded JSON resources
+- `src/Bogoware.Localization.AspNetCore/` - ASP.NET Core integration package
+- `samples/Bogoware.Localization.Sample.Api/` - Sample ASP.NET Core API
+- `tests/Bogoware.Localization.Tests/` - Core library xUnit tests
+- `tests/Bogoware.Localization.AspNetCore.Tests/` - ASP.NET Core integration tests
+- `docs/` - Docusaurus documentation site
 
 ## Key Patterns
 - Resolution chain: self-provider -> DI provider -> registry template -> fallback
 - Culture fallback: exact -> parent -> invariant
 - Three serialization modes: Auto, Explicit, Exhaustive
+- ASP.NET Core: Two-layer approach (Layer 1: PostConfigure on JsonOptions, Layer 2: opt-in response buffering)
+- `AddBogowareLocalization` / `UseBogowareLocalization` for ASP.NET Core setup

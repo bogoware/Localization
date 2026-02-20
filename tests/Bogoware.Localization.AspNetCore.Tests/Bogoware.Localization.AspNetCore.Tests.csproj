@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Bogoware.Localization.AspNetCore.Tests</AssemblyName>
+    <RootNamespace>Bogoware.Localization.AspNetCore.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../samples/Bogoware.Localization.Sample.Api/Bogoware.Localization.Sample.Api.csproj" />
+    <ProjectReference Include="../../src/Bogoware.Localization.AspNetCore/Bogoware.Localization.AspNetCore.csproj" />
+    <ProjectReference Include="../../src/Bogoware.Localization/Bogoware.Localization.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.collector" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources/**/*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

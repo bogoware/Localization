@@ -1,0 +1,6 @@
+{
+  "Bogoware.Localization.Sample.Api.Models.OrderStatus": "L'ordine #{OrderNumber} è {Status}",
+  "Bogoware.Localization.Sample.Api.Models.RequiredFieldError": "'{FieldName}' è obbligatorio",
+  "Bogoware.Localization.Sample.Api.Models.InvalidEmailError": "'{FieldName}' non è un indirizzo email valido",
+  "Bogoware.Localization.Sample.Api.Models.MaxLengthError": "'{FieldName}' non deve superare {MaxLength} caratteri"
+}

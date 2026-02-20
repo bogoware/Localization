@@ -74,6 +74,7 @@ var message = formatter.Format(error);
 - **Resolution chain** — self-provider → DI provider → registry template → fallback message → default format
 - **JSON registry** — load templates from embedded resources, files, or raw JSON strings
 - **DI integration** — `IServiceCollection.AddLocalization()` extension methods
+- **ASP.NET Core integration** — per-request culture resolution, JSON response localization, and ProblemDetails support via `Bogoware.Localization.AspNetCore`
 - **Zero DDD dependencies** — only depends on `Microsoft.Extensions.DependencyInjection.Abstractions` and `Microsoft.Extensions.Logging.Abstractions`
 
 ## Next Steps
@@ -81,4 +82,5 @@ var message = formatter.Format(error);
 - **[Installation](./getting-started/installation)** — Setup and configuration
 - **[Localizable Types](./concepts/localizable-types)** — How to make types localizable
 - **[Provider Chain](./concepts/provider-chain)** — Understanding the resolution chain
+- **[ASP.NET Core Integration](./guides/aspnetcore-integration)** — Per-request culture, automatic JSON localization, and ProblemDetails
 - **[API Reference](./api)** — Complete API documentation

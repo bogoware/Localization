@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <AssemblyName>Bogoware.Localization.Sample.Api</AssemblyName>
+    <RootNamespace>Bogoware.Localization.Sample.Api</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Bogoware.Localization.AspNetCore/Bogoware.Localization.AspNetCore.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources/**/*.json" WithCulture="false" />
+  </ItemGroup>
+</Project>

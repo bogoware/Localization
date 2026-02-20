@@ -46,8 +46,23 @@ public static class LocalizableJsonOptionsExtensions
 
         var modifier = LocalizableJsonModifier.CreateModifier(formatter, mode, culture);
 
-        options.TypeInfoResolver = (options.TypeInfoResolver ?? new DefaultJsonTypeInfoResolver())
-            .WithAddedModifier(modifier);
+        // Wrap every resolver already in the chain with our modifier so that localization
+        // applies regardless of which resolver produced the JsonTypeInfo (e.g. source-generated
+        // JsonSerializerContext). We use TypeInfoResolverChain (safe mutable list) instead
+        // of the TypeInfoResolver getter, which on .NET 8 returns a chain wrapper that causes
+        // a self-referencing cycle when wrapped with WithAddedModifier.
+        var chain = options.TypeInfoResolverChain;
+        if (chain.Count == 0)
+        {
+            chain.Add(new DefaultJsonTypeInfoResolver().WithAddedModifier(modifier));
+        }
+        else
+        {
+            for (var i = 0; i < chain.Count; i++)
+            {
+                chain[i] = chain[i].WithAddedModifier(modifier);
+            }
+        }
 
         return options;
     }

@@ -1,8 +1,13 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Bogoware.Localization/Bogoware.Localization.csproj" />
+    <Project Path="src/Bogoware.Localization.AspNetCore/Bogoware.Localization.AspNetCore.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/Bogoware.Localization.Sample.Api/Bogoware.Localization.Sample.Api.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Bogoware.Localization.Tests/Bogoware.Localization.Tests.csproj" />
+    <Project Path="tests/Bogoware.Localization.AspNetCore.Tests/Bogoware.Localization.AspNetCore.Tests.csproj" />
   </Folder>
 </Solution>
