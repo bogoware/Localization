@@ -47,13 +47,13 @@ public class LocalizationFormatter(
         {
             if (logger is not null)
                 Log.ResolvedVia(logger, typeName, "registry template");
-            return FormatTemplate(template, value);
+            return FormatTemplate(template, value, culture);
         }
 
         // 4. Fallback
         if (logger is not null)
             Log.FallbackUsed(logger, typeName);
-        return BuildFallback(value);
+        return BuildFallback(value, culture);
     }
 
     /// <inheritdoc />
@@ -121,8 +121,12 @@ public class LocalizationFormatter(
     /// <remarks>
     /// Properties named <c>Message</c> are excluded from substitution. Only public readable
     /// instance properties are considered. Unmatched placeholders are left as-is.
+    /// If a property value implements <see cref="ILocalizable"/>, it is formatted recursively
+    /// through the full resolution chain instead of calling <see cref="object.ToString()"/>.
+    /// Circular <see cref="ILocalizable"/> references are not supported and will cause a
+    /// <see cref="StackOverflowException"/>.
     /// </remarks>
-    internal static string FormatTemplate(string template, object source)
+    private string FormatTemplate(string template, object source, CultureInfo culture)
     {
         var props = source.GetType()
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -135,7 +139,10 @@ public class LocalizationFormatter(
             var placeholder = $"{{{prop.Name}}}";
             if (result.Contains(placeholder))
             {
-                result = result.Replace(placeholder, value?.ToString() ?? "");
+                var formatted = value is ILocalizable localizable
+                    ? Format(localizable, culture)
+                    : value?.ToString() ?? "";
+                result = result.Replace(placeholder, formatted);
             }
         }
         return result;
@@ -150,15 +157,24 @@ public class LocalizationFormatter(
     /// Only public instance properties declared directly on the source type are included
     /// (<see cref="BindingFlags.DeclaredOnly"/>), excluding any property named <c>Message</c>.
     /// If no properties match, the type name alone is returned.
+    /// If a property value implements <see cref="ILocalizable"/>, it is formatted recursively
+    /// through the full resolution chain instead of calling <see cref="object.ToString()"/>.
     /// </remarks>
-    internal static string BuildFallback(object source)
+    private string BuildFallback(object source, CultureInfo culture)
     {
         var typeName = source.GetType().Name;
         var props = source.GetType()
             .GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
             .Where(p => p.Name != "Message" && p.CanRead);
 
-        var attrs = string.Join(", ", props.Select(p => $"{p.Name}={p.GetValue(source)}"));
+        var attrs = string.Join(", ", props.Select(p =>
+        {
+            var value = p.GetValue(source);
+            var formatted = value is ILocalizable localizable
+                ? Format(localizable, culture)
+                : $"{value}";
+            return $"{p.Name}={formatted}";
+        }));
         return attrs.Length > 0 ? $"{typeName}({attrs})" : typeName;
     }
 }

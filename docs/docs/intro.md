@@ -78,6 +78,7 @@ var message = formatter.Format(error);
 - **Class-based message modeling** — the type name is the key, properties are the placeholders
 - **Culture fallback chain** — exact culture → parent culture → invariant culture
 - **Resolution chain** — self-provider → DI provider → registry template → fallback format
+- **Nested localization** — `ILocalizable` properties are formatted recursively through the full chain
 - **JSON registry** — load templates from embedded resources, files, or raw JSON strings
 - **JSON serialization converters** — localize properties during serialization
 - **DI integration** — `IServiceCollection.AddLocalization()` extension methods
@@ -90,4 +91,5 @@ var message = formatter.Format(error);
 - **[Localizable Types](./concepts/localizable-types)** — How to make types localizable
 - **[Provider Chain](./concepts/provider-chain)** — Understanding the resolution chain
 - **[ASP.NET Core Integration](./guides/aspnetcore-integration)** — Per-request culture, automatic JSON localization, and ProblemDetails
+- **[Nested Localization](./guides/nested-localization)** — Recursive formatting for nested `ILocalizable` properties
 - **[API Reference](./api)** — Complete API documentation

@@ -30,6 +30,7 @@ This is a well-established idea — types as messages — applied to localizatio
 - **Class-based message modeling** — the type name is the key, properties are the placeholders
 - **Culture fallback chain** — exact → parent → invariant, automatic
 - **Multi-level provider resolution** — self, DI, registry, fallback
+- **Nested localization** — `ILocalizable` properties are formatted recursively through the full resolution chain
 - **JSON registry** — load templates from embedded resources, files, or raw strings
 - **JSON serialization converters** — localize properties during serialization
 - **ASP.NET Core integration** — per-request culture resolution, automatic JSON response localization, and ProblemDetails support via [Bogoware.Localization.AspNetCore](https://www.nuget.org/packages/Bogoware.Localization.AspNetCore)

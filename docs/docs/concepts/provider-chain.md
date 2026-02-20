@@ -12,8 +12,7 @@ The `ILocalizationFormatter` resolves localized strings through a chain of provi
 1. **Self-provider** — If the type implements `ILocalizationProvider`, its `Localize(culture)` method is called directly
 2. **DI provider** — If an `ILocalizationProvider<T>` for the specific type is registered in the DI container, it is used
 3. **Registry template** — The `ILocalizationRegistry` is queried using the type's `FullName` as key
-4. **Fallback message** — A configured fallback format is used
-5. **Default format** — `TypeName(Prop1=val1, Prop2=val2)` — a diagnostic representation
+4. **Default format** — `TypeName(Prop1=val1, Prop2=val2)` — a diagnostic representation
 
 ## Self-Provider
 
@@ -63,3 +62,7 @@ OrderError(OrderId=12345, Reason=Payment declined)
 ```
 
 This ensures that the formatter always returns a meaningful string, even without configured templates.
+
+## Recursive Resolution
+
+When a template placeholder or fallback property resolves to an `ILocalizable` value, the entire chain is applied recursively. The culture is propagated through all nesting levels. See the [Nested Localization guide](../guides/nested-localization) for details and examples.

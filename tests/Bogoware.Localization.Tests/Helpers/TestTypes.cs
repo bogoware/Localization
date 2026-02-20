@@ -217,3 +217,42 @@ public class TestDerivedError : TestBaseError
         Code = code;
     }
 }
+
+/// <summary>
+/// Simulates an invalid currency error for nested localization testing.
+/// Template placeholder: {CurrencyCode}
+/// </summary>
+public class TestInvalidCurrencyError(string currencyCode) : ILocalizable
+{
+    public string CurrencyCode { get; } = currencyCode;
+}
+
+/// <summary>
+/// Simulates a payment error containing a nested ILocalizable property for recursive localization testing.
+/// Template placeholders: {FieldName}, {Detail}
+/// </summary>
+public class TestPaymentError(string fieldName, TestInvalidCurrencyError detail) : ILocalizable
+{
+    public string FieldName { get; } = fieldName;
+    public TestInvalidCurrencyError Detail { get; } = detail;
+}
+
+/// <summary>
+/// Simulates a payment error with a nullable nested ILocalizable property for null-nested testing.
+/// Template placeholders: {FieldName}, {Detail}
+/// </summary>
+public class TestNullablePaymentError(string fieldName, TestInvalidCurrencyError? detail) : ILocalizable
+{
+    public string FieldName { get; } = fieldName;
+    public TestInvalidCurrencyError? Detail { get; } = detail;
+}
+
+/// <summary>
+/// Simulates a 3-level deep nested error: Transaction → Payment → Currency.
+/// Template placeholders: {TransactionId}, {Payment}
+/// </summary>
+public class TestTransactionError(string transactionId, TestPaymentError payment) : ILocalizable
+{
+    public string TransactionId { get; } = transactionId;
+    public TestPaymentError Payment { get; } = payment;
+}

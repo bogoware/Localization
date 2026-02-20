@@ -283,4 +283,92 @@ public class LocalizationFormatterTests
         formatter.Format(new GenericResult<int>(42, 404))
             .Should().Be("Int result: 42 (404)");
     }
+
+    // --- Nested/Recursive localization ---
+
+    [Fact]
+    public void Format_NestedLocalizable_FormatsRecursively()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder()
+            .Add<TestInvalidCurrencyError>("'{CurrencyCode}' is not a valid currency")
+            .Add<TestPaymentError>("Payment field '{FieldName}' is invalid: {Detail}")
+            .Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var error = new TestPaymentError("Amount", new TestInvalidCurrencyError("XYZ"));
+        var result = formatter.Format(error);
+
+        result.Should().Be("Payment field 'Amount' is invalid: 'XYZ' is not a valid currency");
+    }
+
+    [Fact]
+    public void Format_NestedLocalizable_NoTemplateForInner_FallsBackRecursively()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder()
+            .Add<TestPaymentError>("Payment field '{FieldName}' is invalid: {Detail}")
+            .Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var error = new TestPaymentError("Amount", new TestInvalidCurrencyError("XYZ"));
+        var result = formatter.Format(error);
+
+        result.Should().Be("Payment field 'Amount' is invalid: TestInvalidCurrencyError(CurrencyCode=XYZ)");
+    }
+
+    [Fact]
+    public void Format_NestedLocalizable_NoTemplateForOuter_BuildFallbackRecursesInner()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder()
+            .Add<TestInvalidCurrencyError>("'{CurrencyCode}' is not a valid currency")
+            .Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var error = new TestPaymentError("Amount", new TestInvalidCurrencyError("XYZ"));
+        var result = formatter.Format(error);
+
+        result.Should().Be("TestPaymentError(FieldName=Amount, Detail='XYZ' is not a valid currency)");
+    }
+
+    [Fact]
+    public void Format_NestedLocalizable_NullInnerProperty_ReplacesWithEmptyString()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder()
+            .Add<TestNullablePaymentError>("Payment field '{FieldName}' is invalid: {Detail}")
+            .Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var error = new TestNullablePaymentError("Amount", null);
+        var result = formatter.Format(error);
+
+        result.Should().Be("Payment field 'Amount' is invalid: ");
+    }
+
+    [Fact]
+    public void Format_NestedLocalizable_ThreeLevelsDeep_FormatsRecursively()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder()
+            .Add<TestInvalidCurrencyError>("'{CurrencyCode}' is not a valid currency")
+            .Add<TestPaymentError>("Payment field '{FieldName}' is invalid: {Detail}")
+            .Add<TestTransactionError>("Transaction {TransactionId} failed: {Payment}")
+            .Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var error = new TestTransactionError("TX-001",
+            new TestPaymentError("Amount", new TestInvalidCurrencyError("XYZ")));
+        var result = formatter.Format(error);
+
+        result.Should().Be("Transaction TX-001 failed: Payment field 'Amount' is invalid: 'XYZ' is not a valid currency");
+    }
+
+    [Fact]
+    public void Format_NestedLocalizable_NoTemplatesForAny_DoubleFallback()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder().Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var error = new TestPaymentError("Amount", new TestInvalidCurrencyError("XYZ"));
+        var result = formatter.Format(error);
+
+        result.Should().Be("TestPaymentError(FieldName=Amount, Detail=TestInvalidCurrencyError(CurrencyCode=XYZ))");
+    }
 }
