@@ -4,7 +4,7 @@
 .NET localization library using FQDN-keyed templates with `{PropertyName}` placeholders for culture-aware string formatting. Includes JSON serialization support and ASP.NET Core integration.
 
 ## Current Version
-v0.3.0 (published 2026-02-20)
+v0.4.0 (published 2026-02-20)
 
 ## Tech Stack
 - .NET 10 SDK (multi-targets net8.0 and net10.0)
@@ -27,7 +27,7 @@ v0.3.0 (published 2026-02-20)
 - `src/Bogoware.Localization/Serialization/` - JSON serialization converters and modifiers
 - `src/Bogoware.Localization.AspNetCore/` - ASP.NET Core integration package
 - `samples/Bogoware.Localization.Sample.Api/` - Sample ASP.NET Core API
-- `tests/Bogoware.Localization.Tests/` - Core library xUnit tests (92 tests)
+- `tests/Bogoware.Localization.Tests/` - Core library xUnit tests (98 tests)
 - `tests/Bogoware.Localization.AspNetCore.Tests/` - ASP.NET Core integration tests (20 tests)
 - `docs/` - Docusaurus documentation site
 
