@@ -1,8 +1,7 @@
 using System.Text.Json;
+using AwesomeAssertions;
 using Bogoware.Localization.AspNetCore.Tests.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Bogoware.Localization.AspNetCore.Tests.CoexistenceSetup;
 
@@ -26,7 +25,7 @@ public sealed class FrameworkCoexistenceTests(
         var status = doc.RootElement.GetProperty("status").GetString();
 
         // Bogoware localization works
-        Assert.StartsWith("L'ordine", status);
+        status.Should().StartWith("L'ordine");
     }
 
     [Fact]
@@ -37,11 +36,11 @@ public sealed class FrameworkCoexistenceTests(
 
         // Bogoware formatter resolves
         var formatter = sp.GetService<ILocalizationFormatter>();
-        Assert.NotNull(formatter);
+        formatter.Should().NotBeNull();
 
         // Framework localizer factory resolves
         var localizerFactory = sp.GetService<Microsoft.Extensions.Localization.IStringLocalizerFactory>();
-        Assert.NotNull(localizerFactory);
+        localizerFactory.Should().NotBeNull();
 
         output.WriteLine("Both ILocalizationFormatter and IStringLocalizerFactory resolved successfully");
     }
@@ -61,6 +60,6 @@ public sealed class FrameworkCoexistenceTests(
 
         using var doc = JsonDocument.Parse(body);
         var status = doc.RootElement.GetProperty("status").GetString();
-        Assert.Equal("Order #5 is Shipped", status);
+        status.Should().Be("Order #5 is Shipped");
     }
 }

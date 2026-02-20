@@ -1,7 +1,6 @@
 using System.Text.Json;
+using AwesomeAssertions;
 using Bogoware.Localization.AspNetCore.Tests.Fixtures;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Bogoware.Localization.AspNetCore.Tests.CustomRegistrySetup;
 
@@ -24,6 +23,6 @@ public sealed class ManualJsonLoadingTests(
         var status = doc.RootElement.GetProperty("status").GetString();
 
         // Should use the custom template: "Custom: Order #{OrderNumber} — {Status}"
-        Assert.Equal("Custom: Order #99 — Shipped", status);
+        status.Should().Be("Custom: Order #99 — Shipped");
     }
 }

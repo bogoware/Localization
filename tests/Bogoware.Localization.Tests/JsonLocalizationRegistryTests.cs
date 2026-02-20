@@ -1,8 +1,7 @@
 using System.Globalization;
+using AwesomeAssertions;
 using Bogoware.Localization.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
-
 namespace Bogoware.Localization.Tests;
 
 public class JsonLocalizationRegistryTests
@@ -14,6 +13,13 @@ public class JsonLocalizationRegistryTests
         return builder.Build();
     }
 
+    private LocalizationFormatter CreateTestFormatter(JsonLocalizationRegistry? registry = null)
+    {
+        return new LocalizationFormatter(
+            registry ?? LoadTestRegistry(),
+            new ServiceCollection().BuildServiceProvider());
+    }
+
     // --- Registry builder tests ---
 
     [Fact]
@@ -21,11 +27,11 @@ public class JsonLocalizationRegistryTests
     {
         var registry = LoadTestRegistry();
 
-        Assert.True(registry.TryGetTemplate(
+        registry.TryGetTemplate(
             "Bogoware.Localization.Tests.Helpers.TestRequiredFieldError",
             new CultureInfo("en-US"),
-            out var template));
-        Assert.Equal("'{FieldName}' is required", template);
+            out var template).Should().BeTrue();
+        template.Should().Be("'{FieldName}' is required");
     }
 
     [Fact]
@@ -33,11 +39,11 @@ public class JsonLocalizationRegistryTests
     {
         var registry = LoadTestRegistry();
 
-        Assert.True(registry.TryGetTemplate(
+        registry.TryGetTemplate(
             "Bogoware.Localization.Tests.Helpers.TestRequiredFieldError",
             new CultureInfo("it-IT"),
-            out var itTemplate));
-        Assert.Contains("obbligatorio", itTemplate);
+            out var itTemplate).Should().BeTrue();
+        itTemplate.Should().Contain("obbligatorio");
     }
 
     [Fact]
@@ -51,8 +57,8 @@ public class JsonLocalizationRegistryTests
         var overrideJson = """{ "Key": "override" }""";
         registry.LoadFromJson(overrideJson, new CultureInfo("en-US"));
 
-        Assert.True(registry.TryGetTemplate("Key", new CultureInfo("en-US"), out var template));
-        Assert.Equal("override", template);
+        registry.TryGetTemplate("Key", new CultureInfo("en-US"), out var template).Should().BeTrue();
+        template.Should().Be("override");
     }
 
     [Fact]
@@ -60,14 +66,14 @@ public class JsonLocalizationRegistryTests
     {
         var registry = LoadTestRegistry();
 
-        Assert.True(registry.TryGetTemplate(
+        registry.TryGetTemplate(
             "Bogoware.Localization.Tests.Helpers.TestMaxLengthError",
             new CultureInfo("en-US"),
-            out _));
-        Assert.True(registry.TryGetTemplate(
+            out _).Should().BeTrue();
+        registry.TryGetTemplate(
             "Bogoware.Localization.Tests.Helpers.TestInvalidEmailError",
             new CultureInfo("en-US"),
-            out _));
+            out _).Should().BeTrue();
     }
 
     [Fact]
@@ -76,8 +82,8 @@ public class JsonLocalizationRegistryTests
         var registry = new JsonLocalizationRegistry();
         registry.LoadFromJson("""{ "Key": "from en" }""", new CultureInfo("en"));
 
-        Assert.True(registry.TryGetTemplate("Key", new CultureInfo("en-US"), out var template));
-        Assert.Equal("from en", template);
+        registry.TryGetTemplate("Key", new CultureInfo("en-US"), out var template).Should().BeTrue();
+        template.Should().Be("from en");
     }
 
     // --- Formatter with JSON registry tests (formerly ValueErrorLocalizationTests) ---
@@ -85,97 +91,89 @@ public class JsonLocalizationRegistryTests
     [Fact]
     public void RequiredFieldError_FormatsCorrectly_EnUs()
     {
-        var registry = LoadTestRegistry();
-        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = CreateTestFormatter();
 
         var error = new TestRequiredFieldError("Code");
         var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
-        Assert.Equal("'Code' is required", result);
+        result.Should().Be("'Code' is required");
     }
 
     [Fact]
     public void RequiredFieldError_FormatsCorrectly_ItIt()
     {
-        var registry = LoadTestRegistry();
-        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = CreateTestFormatter();
 
         var error = new TestRequiredFieldError("Code");
         var result = formatter.Format((ILocalizable)error, new CultureInfo("it-IT"));
 
-        Assert.Equal("'Code' è obbligatorio", result);
+        result.Should().Be("'Code' è obbligatorio");
     }
 
     [Fact]
     public void InvalidEmailError_FormatsCorrectly_EnUs()
     {
-        var registry = LoadTestRegistry();
-        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = CreateTestFormatter();
 
         var error = new TestInvalidEmailError("Email");
         var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
-        Assert.Equal("'Email' is not a valid email address", result);
+        result.Should().Be("'Email' is not a valid email address");
     }
 
     [Fact]
     public void MaxLengthError_SubstitutesPlaceholders_EnUs()
     {
-        var registry = LoadTestRegistry();
-        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = CreateTestFormatter();
 
         var error = new TestMaxLengthError("Name", 5);
         var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
-        Assert.Equal("'Name' must not exceed 5 characters", result);
+        result.Should().Be("'Name' must not exceed 5 characters");
     }
 
     [Fact]
     public void MaxLengthError_SubstitutesPlaceholders_ItIt()
     {
-        var registry = LoadTestRegistry();
-        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = CreateTestFormatter();
 
         var error = new TestMaxLengthError("Name", 5);
         var result = formatter.Format((ILocalizable)error, new CultureInfo("it-IT"));
 
-        Assert.Equal("'Name' non deve superare 5 caratteri", result);
+        result.Should().Be("'Name' non deve superare 5 caratteri");
     }
 
     [Fact]
     public void MustBeGreaterThanError_SubstitutesPlaceholders()
     {
-        var registry = LoadTestRegistry();
-        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = CreateTestFormatter();
 
         var error = new TestMustBeGreaterThanError("Length", 0);
         var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
-        Assert.Equal("'Length' must be greater than 0", result);
+        result.Should().Be("'Length' must be greater than 0");
     }
 
     [Fact]
     public void OutOfRangeError_SubstitutesMinAndMax()
     {
-        var registry = LoadTestRegistry();
-        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = CreateTestFormatter();
 
         var error = new TestOutOfRangeError("Port", 99999, 1, 65535);
         var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
-        Assert.Equal("'Port' must be between 1 and 65535", result);
+        result.Should().Be("'Port' must be between 1 and 65535");
     }
 
     [Fact]
     public void InvalidFormatError_SubstitutesExpectedFormat()
     {
-        var registry = LoadTestRegistry();
-        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = CreateTestFormatter();
 
         var error = new TestInvalidFormatError("Code", "3 digits");
         var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
-        Assert.Equal("'Code' does not match expected format: 3 digits", result);
+        result.Should().Be("'Code' does not match expected format: 3 digits");
     }
 
     // --- Override tests (formerly ErrorMessageOverrideTests) ---
@@ -192,12 +190,12 @@ public class JsonLocalizationRegistryTests
         """;
         registry.LoadFromJson(overrideJson, new CultureInfo("en-US"));
 
-        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = CreateTestFormatter(registry);
         var error = new TestRequiredFieldError("Code");
 
         var result = formatter.Format((ILocalizable)error, new CultureInfo("en-US"));
 
-        Assert.Equal("Field 'Code' cannot be blank", result);
+        result.Should().Be("Field 'Code' cannot be blank");
     }
 
     [Fact]
@@ -212,13 +210,13 @@ public class JsonLocalizationRegistryTests
         """;
         registry.LoadFromJson(overrideJson, new CultureInfo("en-US"));
 
-        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = CreateTestFormatter(registry);
 
         var required = new TestRequiredFieldError("X");
-        Assert.Equal("OVERRIDDEN", formatter.Format((ILocalizable)required, new CultureInfo("en-US")));
+        formatter.Format((ILocalizable)required, new CultureInfo("en-US")).Should().Be("OVERRIDDEN");
 
         var maxLength = new TestMaxLengthError("Name", 5);
-        Assert.Equal("'Name' must not exceed 5 characters", formatter.Format((ILocalizable)maxLength, new CultureInfo("en-US")));
+        formatter.Format((ILocalizable)maxLength, new CultureInfo("en-US")).Should().Be("'Name' must not exceed 5 characters");
     }
 
     [Fact]
@@ -233,9 +231,9 @@ public class JsonLocalizationRegistryTests
         """;
         registry.LoadFromJson(overrideJson, new CultureInfo("en-US"));
 
-        var formatter = new LocalizationFormatter(registry, new ServiceCollection().BuildServiceProvider());
+        var formatter = CreateTestFormatter(registry);
 
-        Assert.Equal("OVERRIDDEN", formatter.Format((ILocalizable)new TestRequiredFieldError("X"), new CultureInfo("en-US")));
-        Assert.Equal("'X' è obbligatorio", formatter.Format((ILocalizable)new TestRequiredFieldError("X"), new CultureInfo("it-IT")));
+        formatter.Format((ILocalizable)new TestRequiredFieldError("X"), new CultureInfo("en-US")).Should().Be("OVERRIDDEN");
+        formatter.Format((ILocalizable)new TestRequiredFieldError("X"), new CultureInfo("it-IT")).Should().Be("'X' è obbligatorio");
     }
 }

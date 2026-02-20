@@ -1,10 +1,9 @@
 using System.Globalization;
 using System.Text.Json;
+using AwesomeAssertions;
 using Bogoware.Localization.Serialization;
 using Bogoware.Localization.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
-
 namespace Bogoware.Localization.Tests;
 
 // ──────────────────────── Test DTOs ────────────────────────
@@ -177,8 +176,8 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
         using var doc = JsonDocument.Parse(json);
 
-        Assert.Equal(400, doc.RootElement.GetProperty("StatusCode").GetInt32());
-        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("Error").GetString());
+        doc.RootElement.GetProperty("StatusCode").GetInt32().Should().Be(400);
+        doc.RootElement.GetProperty("Error").GetString().Should().Be("'Email' is required");
     }
 
     [Fact]
@@ -201,10 +200,10 @@ public class LocalizableJsonSerializationTests
         using var doc = JsonDocument.Parse(json);
 
         var warnings = doc.RootElement.GetProperty("Warnings");
-        Assert.Equal(JsonValueKind.Array, warnings.ValueKind);
-        Assert.Equal(2, warnings.GetArrayLength());
-        Assert.Equal("'Name' is required", warnings[0].GetString());
-        Assert.Equal("'Bio' must not exceed 200 characters", warnings[1].GetString());
+        warnings.ValueKind.Should().Be(JsonValueKind.Array);
+        warnings.GetArrayLength().Should().Be(2);
+        warnings[0].GetString().Should().Be("'Name' is required");
+        warnings[1].GetString().Should().Be("'Bio' must not exceed 200 characters");
     }
 
     [Fact]
@@ -224,9 +223,9 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
         using var doc = JsonDocument.Parse(json);
 
-        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("Error").GetString());
+        doc.RootElement.GetProperty("Error").GetString().Should().Be("'Email' is required");
         // OrderConfirmation is localized because of [Localize] + DI provider
-        Assert.StartsWith("Order #123", doc.RootElement.GetProperty("Confirmation").GetString());
+        doc.RootElement.GetProperty("Confirmation").GetString().Should().StartWith("Order #123");
     }
 
     [Fact]
@@ -246,10 +245,10 @@ public class LocalizableJsonSerializationTests
         using var doc = JsonDocument.Parse(json);
 
         // Error is localized
-        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("Error").GetString());
+        doc.RootElement.GetProperty("Error").GetString().Should().Be("'Email' is required");
         // RawError is serialized as object
-        Assert.Equal(JsonValueKind.Object, doc.RootElement.GetProperty("RawError").ValueKind);
-        Assert.Equal("Email", doc.RootElement.GetProperty("RawError").GetProperty("FieldName").GetString());
+        doc.RootElement.GetProperty("RawError").ValueKind.Should().Be(JsonValueKind.Object);
+        doc.RootElement.GetProperty("RawError").GetProperty("FieldName").GetString().Should().Be("Email");
     }
 
     // ──── Explicit Mode ────
@@ -271,11 +270,11 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
         using var doc = JsonDocument.Parse(json);
 
-        Assert.Equal(400, doc.RootElement.GetProperty("Code").GetInt32());
+        doc.RootElement.GetProperty("Code").GetInt32().Should().Be(400);
         // UserMessage has [Localize] → localized string
-        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("UserMessage").GetString());
+        doc.RootElement.GetProperty("UserMessage").GetString().Should().Be("'Email' is required");
         // InternalError has no attribute → serialized as object
-        Assert.Equal(JsonValueKind.Object, doc.RootElement.GetProperty("InternalError").ValueKind);
+        doc.RootElement.GetProperty("InternalError").ValueKind.Should().Be(JsonValueKind.Object);
     }
 
     // ──── Exhaustive Mode ────
@@ -299,11 +298,11 @@ public class LocalizableJsonSerializationTests
         using var doc = JsonDocument.Parse(json);
 
         // Code is a primitive → not localized
-        Assert.Equal(200, doc.RootElement.GetProperty("Code").GetInt32());
+        doc.RootElement.GetProperty("Code").GetInt32().Should().Be(200);
         // Error is ILocalizable → localized
-        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("Error").GetString());
+        doc.RootElement.GetProperty("Error").GetString().Should().Be("'Email' is required");
         // Confirmation has a DI provider → localized
-        Assert.StartsWith("Order #456", doc.RootElement.GetProperty("Confirmation").GetString());
+        doc.RootElement.GetProperty("Confirmation").GetString().Should().StartWith("Order #456");
     }
 
     // ──── Null handling ────
@@ -319,8 +318,8 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
         using var doc = JsonDocument.Parse(json);
 
-        Assert.Equal(JsonValueKind.Null, doc.RootElement.GetProperty("Error").ValueKind);
-        Assert.Equal(JsonValueKind.Null, doc.RootElement.GetProperty("Warnings").ValueKind);
+        doc.RootElement.GetProperty("Error").ValueKind.Should().Be(JsonValueKind.Null);
+        doc.RootElement.GetProperty("Warnings").ValueKind.Should().Be(JsonValueKind.Null);
     }
 
     // ──── Fixed culture ────
@@ -340,7 +339,7 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
         using var doc = JsonDocument.Parse(json);
 
-        Assert.Equal("'Email' è obbligatorio", doc.RootElement.GetProperty("Error").GetString());
+        doc.RootElement.GetProperty("Error").GetString().Should().Be("'Email' è obbligatorio");
     }
 
     // ──── Dynamic culture (CurrentUICulture) ────
@@ -364,7 +363,7 @@ public class LocalizableJsonSerializationTests
             CultureInfo.CurrentUICulture = new CultureInfo("it-IT");
             var json = JsonSerializer.Serialize(dto, options);
             using var doc = JsonDocument.Parse(json);
-            Assert.Equal("'Email' è obbligatorio", doc.RootElement.GetProperty("Error").GetString());
+            doc.RootElement.GetProperty("Error").GetString().Should().Be("'Email' è obbligatorio");
         }
         finally
         {
@@ -386,8 +385,8 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
 
         // Deserialization should throw because the converter is write-only
-        Assert.Throws<LocalizationSerializationException>(() =>
-            JsonSerializer.Deserialize<AutoModeDto>(json, options));
+        FluentActions.Invoking(() =>
+            JsonSerializer.Deserialize<AutoModeDto>(json, options)).Should().Throw<LocalizationSerializationException>();
     }
 
     // ──── Fluent chaining ────
@@ -400,7 +399,7 @@ public class LocalizableJsonSerializationTests
 
         var result = options.AddLocalization(formatter);
 
-        Assert.Same(options, result);
+        result.Should().BeSameAs(options);
     }
 
     // ──── Collection with null elements ────
@@ -422,11 +421,11 @@ public class LocalizableJsonSerializationTests
         using var doc = JsonDocument.Parse(json);
 
         var warnings = doc.RootElement.GetProperty("Warnings");
-        Assert.Equal(JsonValueKind.Array, warnings.ValueKind);
-        Assert.Equal(3, warnings.GetArrayLength());
-        Assert.Equal("'Name' is required", warnings[0].GetString());
-        Assert.Equal(JsonValueKind.Null, warnings[1].ValueKind);
-        Assert.Equal("'Email' is required", warnings[2].GetString());
+        warnings.ValueKind.Should().Be(JsonValueKind.Array);
+        warnings.GetArrayLength().Should().Be(3);
+        warnings[0].GetString().Should().Be("'Name' is required");
+        warnings[1].ValueKind.Should().Be(JsonValueKind.Null);
+        warnings[2].GetString().Should().Be("'Email' is required");
     }
 
     // ──── Format<T> with null ────
@@ -438,7 +437,7 @@ public class LocalizableJsonSerializationTests
 
         var result = formatter.Format<TestLocalizable>(null!);
 
-        Assert.Equal("", result);
+        result.Should().Be("");
     }
 
     // ──── Exhaustive mode ToString fallback ────
@@ -458,8 +457,8 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
         using var doc = JsonDocument.Parse(json);
 
-        Assert.Equal(200, doc.RootElement.GetProperty("Code").GetInt32());
-        Assert.Equal("123 Main St, Springfield", doc.RootElement.GetProperty("Address").GetString());
+        doc.RootElement.GetProperty("Code").GetInt32().Should().Be(200);
+        doc.RootElement.GetProperty("Address").GetString().Should().Be("123 Main St, Springfield");
     }
 
     // ──── [DoNotLocalize] in Exhaustive mode ────
@@ -481,10 +480,10 @@ public class LocalizableJsonSerializationTests
         using var doc = JsonDocument.Parse(json);
 
         // Error is localized even in Exhaustive mode (ILocalizable)
-        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("Error").GetString());
+        doc.RootElement.GetProperty("Error").GetString().Should().Be("'Email' is required");
         // RawError has [DoNotLocalize] → serialized as object even in Exhaustive mode
-        Assert.Equal(JsonValueKind.Object, doc.RootElement.GetProperty("RawError").ValueKind);
-        Assert.Equal("Email", doc.RootElement.GetProperty("RawError").GetProperty("FieldName").GetString());
+        doc.RootElement.GetProperty("RawError").ValueKind.Should().Be(JsonValueKind.Object);
+        doc.RootElement.GetProperty("RawError").GetProperty("FieldName").GetString().Should().Be("Email");
     }
 
     // ──── Invariant culture fallback in registry ────
@@ -506,7 +505,7 @@ public class LocalizableJsonSerializationTests
         var error = new TestRequiredFieldError("Email");
         var result = formatter.Format(error, new CultureInfo("fr-FR"));
 
-        Assert.Equal("'Email' is required", result);
+        result.Should().Be("'Email' is required");
     }
 
     // ──── Struct ILocalizable support ────
@@ -520,7 +519,7 @@ public class LocalizableJsonSerializationTests
         var error = new StructRequiredFieldError("Email");
         var result = formatter.Format(error);
 
-        Assert.Equal("'Email' is required", result);
+        result.Should().Be("'Email' is required");
     }
 
     [Fact]
@@ -531,7 +530,7 @@ public class LocalizableJsonSerializationTests
         var provider = new StructSelfProvider("localized value");
         var result = formatter.Format(provider);
 
-        Assert.Equal("localized value", result);
+        result.Should().Be("localized value");
     }
 
     [Fact]
@@ -542,7 +541,7 @@ public class LocalizableJsonSerializationTests
         StructRequiredFieldError? value = null;
         var result = formatter.Format(value);
 
-        Assert.Equal("", result);
+        result.Should().Be("");
     }
 
     // ──── Struct serialization ────
@@ -563,8 +562,8 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
         using var doc = JsonDocument.Parse(json);
 
-        Assert.Equal(400, doc.RootElement.GetProperty("StatusCode").GetInt32());
-        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("DirectError").GetString());
+        doc.RootElement.GetProperty("StatusCode").GetInt32().Should().Be(400);
+        doc.RootElement.GetProperty("DirectError").GetString().Should().Be("'Email' is required");
     }
 
     [Fact]
@@ -583,7 +582,7 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
         using var doc = JsonDocument.Parse(json);
 
-        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("Error").GetString());
+        doc.RootElement.GetProperty("Error").GetString().Should().Be("'Email' is required");
     }
 
     [Fact]
@@ -602,7 +601,7 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
         using var doc = JsonDocument.Parse(json);
 
-        Assert.Equal(JsonValueKind.Null, doc.RootElement.GetProperty("Error").ValueKind);
+        doc.RootElement.GetProperty("Error").ValueKind.Should().Be(JsonValueKind.Null);
     }
 
     // ──── Exception tests ────
@@ -612,8 +611,8 @@ public class LocalizableJsonSerializationTests
     {
         var registry = new JsonLocalizationRegistry();
 
-        Assert.Throws<LocalizationConfigurationException>(() =>
-            registry.LoadFromJson("{ not valid json }", CultureInfo.InvariantCulture));
+        FluentActions.Invoking(() =>
+            registry.LoadFromJson("{ not valid json }", CultureInfo.InvariantCulture)).Should().Throw<LocalizationConfigurationException>();
     }
 
     [Fact]
@@ -621,8 +620,8 @@ public class LocalizableJsonSerializationTests
     {
         var builder = new JsonLocalizationRegistryBuilder();
 
-        Assert.Throws<LocalizationConfigurationException>(() =>
-            builder.AddFromFile("/nonexistent/path/file.json", CultureInfo.InvariantCulture));
+        FluentActions.Invoking(() =>
+            builder.AddFromFile("/nonexistent/path/file.json", CultureInfo.InvariantCulture)).Should().Throw<LocalizationConfigurationException>();
     }
 
     [Fact]
@@ -640,8 +639,8 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
         using var doc = JsonDocument.Parse(json);
 
-        Assert.Equal("direct value", doc.RootElement.GetProperty("DirectProvider").GetString());
-        Assert.Equal("nullable value", doc.RootElement.GetProperty("NullableProvider").GetString());
+        doc.RootElement.GetProperty("DirectProvider").GetString().Should().Be("direct value");
+        doc.RootElement.GetProperty("NullableProvider").GetString().Should().Be("nullable value");
     }
 
     [Fact]
@@ -658,8 +657,8 @@ public class LocalizableJsonSerializationTests
         };
         var json = JsonSerializer.Serialize(dto, options);
 
-        Assert.Throws<LocalizationSerializationException>(() =>
-            JsonSerializer.Deserialize<StructAutoModeDto>(json, options));
+        FluentActions.Invoking(() =>
+            JsonSerializer.Deserialize<StructAutoModeDto>(json, options)).Should().Throw<LocalizationSerializationException>();
     }
 
     [Fact]
@@ -679,12 +678,12 @@ public class LocalizableJsonSerializationTests
         var json = JsonSerializer.Serialize(dto, options);
         using var doc = JsonDocument.Parse(json);
 
-        Assert.Equal(400, doc.RootElement.GetProperty("Code").GetInt32());
+        doc.RootElement.GetProperty("Code").GetInt32().Should().Be(400);
         // MarkedError has [Localize] → localized string
-        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("MarkedError").GetString());
+        doc.RootElement.GetProperty("MarkedError").GetString().Should().Be("'Email' is required");
         // UnmarkedError has no attribute → falls through to default STJ serialization (object)
-        Assert.Equal(JsonValueKind.Object, doc.RootElement.GetProperty("UnmarkedError").ValueKind);
-        Assert.Equal("Email", doc.RootElement.GetProperty("UnmarkedError").GetProperty("FieldName").GetString());
+        doc.RootElement.GetProperty("UnmarkedError").ValueKind.Should().Be(JsonValueKind.Object);
+        doc.RootElement.GetProperty("UnmarkedError").GetProperty("FieldName").GetString().Should().Be("Email");
     }
 
     [Fact]
@@ -704,10 +703,10 @@ public class LocalizableJsonSerializationTests
         using var doc = JsonDocument.Parse(json);
 
         // Error → localized string (ILocalizable, no [DoNotLocalize])
-        Assert.Equal("'Email' is required", doc.RootElement.GetProperty("Error").GetString());
+        doc.RootElement.GetProperty("Error").GetString().Should().Be("'Email' is required");
         // RawError has [DoNotLocalize] → serialized as object even in Exhaustive mode
-        Assert.Equal(JsonValueKind.Object, doc.RootElement.GetProperty("RawError").ValueKind);
-        Assert.Equal("Email", doc.RootElement.GetProperty("RawError").GetProperty("FieldName").GetString());
+        doc.RootElement.GetProperty("RawError").ValueKind.Should().Be(JsonValueKind.Object);
+        doc.RootElement.GetProperty("RawError").GetProperty("FieldName").GetString().Should().Be("Email");
     }
 
     [Fact]
@@ -726,8 +725,8 @@ public class LocalizableJsonSerializationTests
         using var doc = JsonDocument.Parse(json);
 
         var warnings = doc.RootElement.GetProperty("Warnings");
-        Assert.Equal(JsonValueKind.Array, warnings.ValueKind);
-        Assert.Equal(0, warnings.GetArrayLength());
+        warnings.ValueKind.Should().Be(JsonValueKind.Array);
+        warnings.GetArrayLength().Should().Be(0);
     }
 
     [Fact]
@@ -739,7 +738,7 @@ public class LocalizableJsonSerializationTests
         ILocalizable boxed = new StructRequiredFieldError("Email");
         var result = formatter.Format(boxed, CultureInfo.InvariantCulture);
 
-        Assert.Equal("'Email' is required", result);
+        result.Should().Be("'Email' is required");
     }
 
     [Fact]
@@ -759,8 +758,8 @@ public class LocalizableJsonSerializationTests
         using var doc = JsonDocument.Parse(json);
 
         var warnings = doc.RootElement.GetProperty("Warnings");
-        Assert.Equal(JsonValueKind.Array, warnings.ValueKind);
-        Assert.Equal(1, warnings.GetArrayLength());
-        Assert.Equal("'Email' is required", warnings[0].GetString());
+        warnings.ValueKind.Should().Be(JsonValueKind.Array);
+        warnings.GetArrayLength().Should().Be(1);
+        warnings[0].GetString().Should().Be("'Email' is required");
     }
 }

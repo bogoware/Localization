@@ -1,7 +1,6 @@
 using System.Text.Json;
+using AwesomeAssertions;
 using Bogoware.Localization.AspNetCore.Tests.Fixtures;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Bogoware.Localization.AspNetCore.Tests.DefaultSetup;
 
@@ -23,7 +22,7 @@ public sealed class CultureResolutionTests(
 
         using var doc = JsonDocument.Parse(body);
         var status = doc.RootElement.GetProperty("status").GetString();
-        Assert.StartsWith("L'ordine", status);
+        status.Should().StartWith("L'ordine");
     }
 
     [Fact]
@@ -39,7 +38,7 @@ public sealed class CultureResolutionTests(
 
         using var doc = JsonDocument.Parse(body);
         var status = doc.RootElement.GetProperty("status").GetString();
-        Assert.StartsWith("L'ordine", status);
+        status.Should().StartWith("L'ordine");
     }
 
     [Fact]
@@ -55,7 +54,7 @@ public sealed class CultureResolutionTests(
 
         using var doc = JsonDocument.Parse(body);
         var status = doc.RootElement.GetProperty("status").GetString();
-        Assert.StartsWith("Order #", status);
+        status.Should().StartWith("Order #");
     }
 
     [Fact]
@@ -73,6 +72,6 @@ public sealed class CultureResolutionTests(
         using var doc = JsonDocument.Parse(body);
         var status = doc.RootElement.GetProperty("status").GetString();
         // Should fall back to en-US default
-        Assert.StartsWith("Order #", status);
+        status.Should().StartWith("Order #");
     }
 }

@@ -1,7 +1,6 @@
 using System.Text.Json;
+using AwesomeAssertions;
 using Bogoware.Localization.AspNetCore.Tests.Fixtures;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Bogoware.Localization.AspNetCore.Tests.ResponseBufferingSetup;
 
@@ -23,7 +22,7 @@ public sealed class ResponseBufferingTests(
 
         using var doc = JsonDocument.Parse(body);
         var status = doc.RootElement.GetProperty("status").GetString();
-        Assert.Equal("Order #10 is Shipped", status);
+        status.Should().Be("Order #10 is Shipped");
     }
 
     [Fact]
@@ -40,7 +39,7 @@ public sealed class ResponseBufferingTests(
 
         using var doc = JsonDocument.Parse(body);
         var status = doc.RootElement.GetProperty("status").GetString();
-        Assert.StartsWith("L'ordine", status);
+        status.Should().StartWith("L'ordine");
     }
 
     [Fact]
@@ -55,7 +54,7 @@ public sealed class ResponseBufferingTests(
         output.WriteLine($"Health (excluded): {body}");
 
         using var doc = JsonDocument.Parse(body);
-        Assert.Equal("healthy", doc.RootElement.GetProperty("status").GetString());
+        doc.RootElement.GetProperty("status").GetString().Should().Be("healthy");
     }
 
     [Fact]
@@ -69,6 +68,6 @@ public sealed class ResponseBufferingTests(
         var body = await response.Content.ReadAsStringAsync();
         output.WriteLine($"Text (pass-through): {body}");
 
-        Assert.Equal("plain text response", body);
+        body.Should().Be("plain text response");
     }
 }

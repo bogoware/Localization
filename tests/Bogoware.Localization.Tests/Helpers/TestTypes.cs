@@ -129,3 +129,67 @@ public readonly record struct StructSelfProvider(string Value) : ILocalizationPr
 {
     public string Localize(CultureInfo? culture = null) => Value;
 }
+
+/// <summary>
+/// A DI provider that throws during Localize, for testing exception wrapping in TryFormatViaDiProvider.
+/// </summary>
+public class ThrowingDiProvider : ILocalizationProvider<TestLocalizable>
+{
+    public string Localize(TestLocalizable value, CultureInfo? culture = null)
+        => throw new InvalidOperationException("Provider blew up");
+}
+
+/// <summary>
+/// A non-ILocalizable type with a DI provider, for testing Format&lt;T&gt; with DI resolution.
+/// </summary>
+public class NonLocalizableOrder
+{
+    public string OrderId { get; set; } = "";
+}
+
+/// <summary>
+/// DI provider for NonLocalizableOrder.
+/// </summary>
+public class NonLocalizableOrderProvider : ILocalizationProvider<NonLocalizableOrder>
+{
+    public string Localize(NonLocalizableOrder value, CultureInfo? culture = null)
+        => $"Order #{value.OrderId}";
+}
+
+/// <summary>
+/// ILocalizable with a nullable property, for testing FormatTemplate null property handling.
+/// Template placeholder: {FieldName}, {Details}
+/// </summary>
+public class TestNullablePropertyError(string fieldName, string? details) : ILocalizable
+{
+    public string FieldName { get; } = fieldName;
+    public string? Details { get; } = details;
+}
+
+/// <summary>
+/// Inherits from a base class to test BuildFallback DeclaredOnly behavior.
+/// Only DeclaredOnly properties (Code) should appear in fallback, not inherited ones (FieldName).
+/// </summary>
+public class TestBaseError : ILocalizable
+{
+    public string FieldName { get; }
+
+    public TestBaseError(string fieldName)
+    {
+        FieldName = fieldName;
+    }
+}
+
+/// <summary>
+/// Derived error that declares its own Code property.
+/// BuildFallback with DeclaredOnly should show Code but not FieldName.
+/// </summary>
+public class TestDerivedError : TestBaseError
+{
+    public int Code { get; }
+
+    public TestDerivedError(string fieldName, int code) : base(fieldName)
+    {
+        Code = code;
+    }
+}

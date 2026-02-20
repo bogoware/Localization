@@ -1,6 +1,5 @@
 using System.Globalization;
-using Xunit;
-
+using AwesomeAssertions;
 namespace Bogoware.Localization.Tests;
 
 public class JsoncSupportTests
@@ -24,10 +23,10 @@ public class JsoncSupportTests
         var registry = new JsonLocalizationRegistry();
         registry.LoadFromJson(jsonc, EnUs);
 
-        Assert.True(registry.TryGetTemplate("Key1", EnUs, out var v1));
-        Assert.Equal("Value1", v1);
-        Assert.True(registry.TryGetTemplate("Key2", EnUs, out var v2));
-        Assert.Equal("Value2", v2);
+        registry.TryGetTemplate("Key1", EnUs, out var v1).Should().BeTrue();
+        v1.Should().Be("Value1");
+        registry.TryGetTemplate("Key2", EnUs, out var v2).Should().BeTrue();
+        v2.Should().Be("Value2");
     }
 
     // --- Block comments ---
@@ -50,10 +49,10 @@ public class JsoncSupportTests
         var registry = new JsonLocalizationRegistry();
         registry.LoadFromJson(jsonc, EnUs);
 
-        Assert.True(registry.TryGetTemplate("Key1", EnUs, out var v1));
-        Assert.Equal("Value1", v1);
-        Assert.True(registry.TryGetTemplate("Key2", EnUs, out var v2));
-        Assert.Equal("Value2", v2);
+        registry.TryGetTemplate("Key1", EnUs, out var v1).Should().BeTrue();
+        v1.Should().Be("Value1");
+        registry.TryGetTemplate("Key2", EnUs, out var v2).Should().BeTrue();
+        v2.Should().Be("Value2");
     }
 
     // --- Mixed comments ---
@@ -73,10 +72,10 @@ public class JsoncSupportTests
         var registry = new JsonLocalizationRegistry();
         registry.LoadFromJson(jsonc, EnUs);
 
-        Assert.True(registry.TryGetTemplate("Key1", EnUs, out var v1));
-        Assert.Equal("Value1", v1);
-        Assert.True(registry.TryGetTemplate("Key2", EnUs, out var v2));
-        Assert.Equal("Value2", v2);
+        registry.TryGetTemplate("Key1", EnUs, out var v1).Should().BeTrue();
+        v1.Should().Be("Value1");
+        registry.TryGetTemplate("Key2", EnUs, out var v2).Should().BeTrue();
+        v2.Should().Be("Value2");
     }
 
     // --- Trailing commas ---
@@ -94,10 +93,10 @@ public class JsoncSupportTests
         var registry = new JsonLocalizationRegistry();
         registry.LoadFromJson(jsonc, EnUs);
 
-        Assert.True(registry.TryGetTemplate("Key1", EnUs, out var v1));
-        Assert.Equal("Value1", v1);
-        Assert.True(registry.TryGetTemplate("Key2", EnUs, out var v2));
-        Assert.Equal("Value2", v2);
+        registry.TryGetTemplate("Key1", EnUs, out var v1).Should().BeTrue();
+        v1.Should().Be("Value1");
+        registry.TryGetTemplate("Key2", EnUs, out var v2).Should().BeTrue();
+        v2.Should().Be("Value2");
     }
 
     // --- Combined JSONC features ---
@@ -116,10 +115,10 @@ public class JsoncSupportTests
         var registry = new JsonLocalizationRegistry();
         registry.LoadFromJson(jsonc, EnUs);
 
-        Assert.True(registry.TryGetTemplate("Key1", EnUs, out var v1));
-        Assert.Equal("Value1", v1);
-        Assert.True(registry.TryGetTemplate("Key2", EnUs, out var v2));
-        Assert.Equal("Value2", v2);
+        registry.TryGetTemplate("Key1", EnUs, out var v1).Should().BeTrue();
+        v1.Should().Be("Value1");
+        registry.TryGetTemplate("Key2", EnUs, out var v2).Should().BeTrue();
+        v2.Should().Be("Value2");
     }
 
     // --- Edge cases ---
@@ -137,7 +136,7 @@ public class JsoncSupportTests
         var registry = new JsonLocalizationRegistry();
         registry.LoadFromJson(jsonc, EnUs);
 
-        Assert.False(registry.TryGetTemplate("AnyKey", EnUs, out _));
+        registry.TryGetTemplate("AnyKey", EnUs, out _).Should().BeFalse();
     }
 
     [Fact]
@@ -148,7 +147,7 @@ public class JsoncSupportTests
         var registry = new JsonLocalizationRegistry();
         registry.LoadFromJson(json, EnUs);
 
-        Assert.True(registry.TryGetTemplate("Key", EnUs, out var v));
-        Assert.Equal("Value", v);
+        registry.TryGetTemplate("Key", EnUs, out var v).Should().BeTrue();
+        v.Should().Be("Value");
     }
 }

@@ -1,8 +1,6 @@
-using System.Net.Http.Json;
 using System.Text.Json;
+using AwesomeAssertions;
 using Bogoware.Localization.AspNetCore.Tests.Fixtures;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Bogoware.Localization.AspNetCore.Tests.DefaultSetup;
 
@@ -25,7 +23,7 @@ public sealed class ResponseLocalizationTests(
         using var doc = JsonDocument.Parse(body);
         var status = doc.RootElement.GetProperty("status").GetString();
 
-        Assert.Equal("Order #42 is Shipped", status);
+        status.Should().Be("Order #42 is Shipped");
     }
 
     [Fact]
@@ -43,7 +41,7 @@ public sealed class ResponseLocalizationTests(
         using var doc = JsonDocument.Parse(body);
         var status = doc.RootElement.GetProperty("status").GetString();
 
-        Assert.Equal("L'ordine #7 è Shipped", status);
+        status.Should().Be("L'ordine #7 è Shipped");
     }
 
     [Fact]
@@ -61,6 +59,6 @@ public sealed class ResponseLocalizationTests(
         using var doc = JsonDocument.Parse(body);
         var status = doc.RootElement.GetProperty("status").GetString();
 
-        Assert.Equal("Order #1 is Shipped", status);
+        status.Should().Be("Order #1 is Shipped");
     }
 }
