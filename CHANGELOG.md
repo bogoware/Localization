@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-03-09
+
+### Added
+- `JsonLocalizationRegistryBuilder.LoadFromJson` convenience method for loading raw JSON strings directly on the builder without bypassing it
+- Circular reference detection in `LocalizationFormatter` — nested `ILocalizable` cycles now throw `LocalizationFormattingException` instead of causing a `StackOverflowException`
+
+### Changed
+- **Breaking:** `JsonLocalizationRegistryBuilder` is now single-use — calling `Build()` marks the builder as consumed; subsequent `Build()` or `AddFrom*` calls throw `InvalidOperationException`
+- DI registration pattern replaced: `AddLocalization` no longer scans `ServiceDescriptor.ImplementationInstance` to find an internal configurator; instead, each call registers an individual action wrapper collected via `GetServices<>` at resolution time, making it resilient to DI container decoration and shimming
+
+### Removed
+- `LocalizationRegistryConfigurator` internal class (replaced by `LocalizationRegistryAction`)
+
 ## [0.4.0] - 2026-02-20
 
 ### Added
@@ -60,7 +73,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DI integration via `IServiceCollection` extension methods
 - Comprehensive XML documentation
 
-[Unreleased]: https://github.com/bogoware/Localization/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/bogoware/Localization/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/bogoware/Localization/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/bogoware/Localization/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/bogoware/Localization/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/bogoware/Localization/compare/v0.1.1...v0.2.0
