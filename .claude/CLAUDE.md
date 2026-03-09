@@ -10,36 +10,68 @@ dotnet pack src/Bogoware.Localization/Bogoware.Localization.csproj --configurati
 dotnet pack src/Bogoware.Localization.AspNetCore/Bogoware.Localization.AspNetCore.csproj --configuration Release
 ```
 
-SDK version is pinned in `global.json` (.NET 10). Multi-targets `net8.0` and `net10.0`.
+SDK pinned in `global.json` (.NET 10.0.102, rollForward: latestFeature). Multi-targets `net8.0` + `net10.0`.
 
 ## Architecture
 
-Two libraries + tests:
-
 ```
 Localization/
-├── src/Bogoware.Localization/              # Core library
-├── src/Bogoware.Localization.AspNetCore/   # ASP.NET Core integration
-├── tests/Bogoware.Localization.Tests/      # Core xUnit tests
-├── tests/Bogoware.Localization.AspNetCore.Tests/ # AspNetCore xUnit tests
-├── Bogoware.Localization.slnx
-├── Directory.Build.props                   # Multi-target net8.0;net10.0
-└── Directory.Packages.props                # Central package management
+├── src/Bogoware.Localization/              # Core library (NuGet: Bogoware.Localization)
+│   └── Serialization/                      # STJ converters, modifiers, attributes
+├── src/Bogoware.Localization.AspNetCore/   # ASP.NET Core integration (NuGet)
+├── tests/Bogoware.Localization.Tests/      # Core xUnit unit tests
+├── tests/Bogoware.Localization.AspNetCore.Tests/ # Integration tests (WebApplicationFactory)
+├── samples/Bogoware.Localization.Sample.Api/     # Sample Minimal API (also integration test host)
+├── docs/                                   # Docusaurus 3.9.2 documentation site
+├── scripts/                                # generate-api-docs.sh, sync-readme.js
+├── .github/workflows/                      # build.yml, publish.yml, docs.yml
+├── Directory.Build.props                   # Multi-target, nullable, implicit usings, XML docs
+└── Directory.Packages.props                # Central package management (all versions here)
 ```
 
 ## Key Patterns
 
 - **FQDN-keyed templates**: `Type.FullName` maps to localized format strings with `{PropertyName}` placeholders
-- **Resolution chain**: self-provider → DI provider → registry template → fallback message → `TypeName(Prop=val)`
-- **Culture fallback**: exact culture → parent culture → invariant culture
-- **No DDD dependencies (core library)**: only `Microsoft.Extensions.DependencyInjection.Abstractions` and `Microsoft.Extensions.Logging.Abstractions`
+- **Resolution chain (immutable order)**: self-provider → DI provider → registry template → fallback `TypeName(Prop=val)` — never reorder or skip
+- **Culture fallback (3-tier)**: exact culture → parent culture → invariant culture — built into `TryGetTemplate`, don't reimplement
+- **Additive DI**: multiple `AddLocalization()` calls accumulate via `GetServices<>` — later templates override per key/culture
+- **Nested localization**: `ILocalizable` properties formatted recursively through full chain (not `ToString()`)
+- **Single-use builder**: `JsonLocalizationRegistryBuilder.Build()` consumes it; reuse throws `InvalidOperationException`
+- **Circular reference detection**: nested `ILocalizable` cycles throw `LocalizationFormattingException`
+- **ASP.NET Core two layers**: Layer 1 (default) = `IPostConfigureOptions<JsonOptions>` for Minimal API + MVC; Layer 2 (opt-in) = response buffering middleware
+- **Serialization modes**: `Explicit` | `Auto` (default) | `Exhaustive` — `[DoNotLocalize]` always wins
 
 ## Conventions
 
 - Namespaces: `Bogoware.Localization`, `Bogoware.Localization.AspNetCore`
 - Central package management: versions only in `Directory.Packages.props`
+- `.csproj` files use `0.0.0-local` — real version injected from git tag via `/p:Version`
 - Test embedded resources use `WithCulture="false"` to prevent MSBuild satellite assembly routing
-- Package IDs: `Bogoware.Localization`, `Bogoware.Localization.AspNetCore` — both published to NuGet.org on `v*` tags
+- Naming: `I` prefix (interfaces), `*Builder` suffix, `*Extensions` suffix, `Bogoware*` prefix (ASP.NET types), `*JsonConverter` suffix
+- Logging: `[LoggerMessage]` source-generated methods in `Log.cs` only — never string interpolation
+- Custom exceptions: `LocalizationConfigurationException`, `LocalizationFormattingException`, `LocalizationSerializationException` — never bare `Exception`
+- JSON templates: `*.messages.{culture}.json`; invariant = no culture segment; JSONC supported
+- One file per type; serialization in `Serialization/` subfolder
+- EditorConfig: C# 4-space indent CRLF; project files 2-space indent CRLF
+
+## Testing
+
+- **Core tests**: direct instantiation with embedded JSON resources, `AwesomeAssertions` fluent syntax (`.Should()`)
+- **Integration tests**: `WebApplicationFactory` with `Sample.Api` as test host — don't create separate web apps
+- **Scenario-based**: each setup variant gets its own folder + fixture in `Fixtures/`
+- Shared test types in `Helpers/TestTypes.cs`
+- `[Fact]` for single-case, `[Theory]` for parameterized
+- Must pass on both `net8.0` and `net10.0`
+
+## Branch Model & CI/CD
+
+- **`rel/prod`** is the production branch (NOT `main` or `master`)
+- Feature branches: `feat/*`, `fix/*`, `refactor/*`
+- **`build.yml`**: CI on push/PR to `rel/*` — restore → build → test (both TFMs)
+- **`publish.yml`**: On `v*` tag or GitHub Release — build → test → pack → Meziantou validate → NuGet push (pwsh shell, version from git tag)
+- **`docs.yml`**: On `rel/prod` push, release, or manual — .NET build → xmldoc2md (net8.0 DLL only) → changelog sync → Docusaurus build → GitHub Pages deploy
+- Docs site: `https://bogoware.github.io/Localization/` — API docs auto-generated, `CHANGELOG.md` synced via `scripts/sync-readme.js`
+- Docs must build cleanly on every `rel/prod` push — broken docs block the site
 
 ## Post-Task Review
 
