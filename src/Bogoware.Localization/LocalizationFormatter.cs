@@ -17,7 +17,50 @@ public class LocalizationFormatter(
     /// <inheritdoc />
     public string Format(ILocalizable value, CultureInfo? culture = null)
     {
+        return FormatCore(value, culture ?? CultureInfo.CurrentUICulture,
+            new HashSet<object>(ReferenceEqualityComparer.Instance));
+    }
+
+    /// <inheritdoc />
+    public string Format<T>(T value, CultureInfo? culture = null)
+    {
+        // 1. If it's an ILocalizable, delegate
+        if (value is ILocalizable ls)
+        {
+            return FormatCore(ls, culture ?? CultureInfo.CurrentUICulture,
+                new HashSet<object>(ReferenceEqualityComparer.Instance));
+        }
+
         culture ??= CultureInfo.CurrentUICulture;
+
+        // 2. DI provider for runtime type
+        if (value is not null)
+        {
+            var runtimeType = value.GetType();
+            var diResult = TryFormatViaDiProvider(runtimeType, value, culture);
+            if (diResult is not null)
+            {
+                if (logger is not null)
+                    Log.ResolvedVia(logger, runtimeType.FullName ?? "unknown", "DI provider (generic)");
+                return diResult;
+            }
+        }
+
+        // 3. ToString fallback + warning
+        var result = value?.ToString() ?? "";
+        if (logger is not null)
+            Log.FallbackUsed(logger, value?.GetType().FullName ?? "null");
+        return result;
+    }
+
+    private string FormatCore(ILocalizable value, CultureInfo culture, HashSet<object> visited)
+    {
+        if (!visited.Add(value))
+            throw new LocalizationFormattingException(
+                $"Circular reference detected while formatting type '{value.GetType().FullName}'. " +
+                "Ensure your ILocalizable object graph does not contain cycles.",
+                value.GetType());
+
         var runtimeType = value.GetType();
         var typeName = runtimeType.FullName!;
 
@@ -47,44 +90,13 @@ public class LocalizationFormatter(
         {
             if (logger is not null)
                 Log.ResolvedVia(logger, typeName, "registry template");
-            return FormatTemplate(template, value, culture);
+            return FormatTemplate(template, value, culture, visited);
         }
 
         // 4. Fallback
         if (logger is not null)
             Log.FallbackUsed(logger, typeName);
-        return BuildFallback(value, culture);
-    }
-
-    /// <inheritdoc />
-    public string Format<T>(T value, CultureInfo? culture = null)
-    {
-        // 1. If it's an ILocalizable, delegate
-        if (value is ILocalizable ls)
-        {
-            return Format(ls, culture);
-        }
-
-        culture ??= CultureInfo.CurrentUICulture;
-
-        // 2. DI provider for runtime type
-        if (value is not null)
-        {
-            var runtimeType = value.GetType();
-            var diResult = TryFormatViaDiProvider(runtimeType, value, culture);
-            if (diResult is not null)
-            {
-                if (logger is not null)
-                    Log.ResolvedVia(logger, runtimeType.FullName ?? "unknown", "DI provider (generic)");
-                return diResult;
-            }
-        }
-
-        // 3. ToString fallback + warning
-        var result = value?.ToString() ?? "";
-        if (logger is not null)
-            Log.FallbackUsed(logger, value?.GetType().FullName ?? "null");
-        return result;
+        return BuildFallback(value, culture, visited);
     }
 
     private static readonly ConcurrentDictionary<Type, MethodInfo> _localizeMethodCache = new();
@@ -118,16 +130,16 @@ public class LocalizationFormatter(
     /// <param name="template">The format template containing <c>{PropertyName}</c> placeholders.</param>
     /// <param name="source">The object whose public instance properties supply placeholder values.</param>
     /// <param name="culture">The culture to use when recursively formatting nested <see cref="ILocalizable"/> values.</param>
+    /// <param name="visited">Tracks already-visited objects to detect circular references.</param>
     /// <returns>The template with all matching placeholders replaced by property values.</returns>
     /// <remarks>
     /// Properties named <c>Message</c> are excluded from substitution. Only public readable
     /// instance properties are considered. Unmatched placeholders are left as-is.
     /// If a property value implements <see cref="ILocalizable"/>, it is formatted recursively
     /// through the full resolution chain instead of calling <see cref="object.ToString()"/>.
-    /// Circular <see cref="ILocalizable"/> references are not supported and will cause a
-    /// <see cref="StackOverflowException"/>.
+    /// Circular <see cref="ILocalizable"/> references throw <see cref="LocalizationFormattingException"/>.
     /// </remarks>
-    private string FormatTemplate(string template, object source, CultureInfo culture)
+    private string FormatTemplate(string template, object source, CultureInfo culture, HashSet<object> visited)
     {
         var props = source.GetType()
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -141,7 +153,7 @@ public class LocalizationFormatter(
             if (result.Contains(placeholder))
             {
                 var formatted = value is ILocalizable localizable
-                    ? Format(localizable, culture)
+                    ? FormatCore(localizable, culture, visited)
                     : value?.ToString() ?? "";
                 result = result.Replace(placeholder, formatted);
             }
@@ -154,6 +166,7 @@ public class LocalizationFormatter(
     /// </summary>
     /// <param name="source">The object to describe.</param>
     /// <param name="culture">The culture to use when recursively formatting nested <see cref="ILocalizable"/> values.</param>
+    /// <param name="visited">Tracks already-visited objects to detect circular references.</param>
     /// <returns>A diagnostic-style string representation.</returns>
     /// <remarks>
     /// Only public instance properties declared directly on the source type are included
@@ -161,8 +174,9 @@ public class LocalizationFormatter(
     /// If no properties match, the type name alone is returned.
     /// If a property value implements <see cref="ILocalizable"/>, it is formatted recursively
     /// through the full resolution chain instead of calling <see cref="object.ToString()"/>.
+    /// Circular <see cref="ILocalizable"/> references throw <see cref="LocalizationFormattingException"/>.
     /// </remarks>
-    private string BuildFallback(object source, CultureInfo culture)
+    private string BuildFallback(object source, CultureInfo culture, HashSet<object> visited)
     {
         var typeName = source.GetType().Name;
         var props = source.GetType()
@@ -173,7 +187,7 @@ public class LocalizationFormatter(
         {
             var value = p.GetValue(source);
             var formatted = value is ILocalizable localizable
-                ? Format(localizable, culture)
+                ? FormatCore(localizable, culture, visited)
                 : $"{value}";
             return $"{p.Name}={formatted}";
         }));

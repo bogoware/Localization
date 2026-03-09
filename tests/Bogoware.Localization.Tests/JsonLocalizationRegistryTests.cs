@@ -271,4 +271,50 @@ public class JsonLocalizationRegistryTests
 
         result.Should().Be("custom message");
     }
+
+    // --- One-shot builder tests ---
+
+    [Fact]
+    public void Build_CalledTwice_ThrowsInvalidOperationException()
+    {
+        var builder = new JsonLocalizationRegistryBuilder();
+        builder.Build();
+
+        FluentActions.Invoking(() => builder.Build())
+            .Should().Throw<InvalidOperationException>()
+            .WithMessage("*already been built*");
+    }
+
+    [Fact]
+    public void AddFromAssembly_AfterBuild_ThrowsInvalidOperationException()
+    {
+        var builder = new JsonLocalizationRegistryBuilder();
+        builder.Build();
+
+        FluentActions.Invoking(() => builder.AddFromAssembly(typeof(JsonLocalizationRegistryTests).Assembly))
+            .Should().Throw<InvalidOperationException>()
+            .WithMessage("*already been built*");
+    }
+
+    [Fact]
+    public void LoadFromJson_AfterBuild_ThrowsInvalidOperationException()
+    {
+        var builder = new JsonLocalizationRegistryBuilder();
+        builder.Build();
+
+        FluentActions.Invoking(() => builder.LoadFromJson("{}", CultureInfo.InvariantCulture))
+            .Should().Throw<InvalidOperationException>()
+            .WithMessage("*already been built*");
+    }
+
+    [Fact]
+    public void LoadFromJson_OnBuilder_WorksBeforeBuild()
+    {
+        var builder = new JsonLocalizationRegistryBuilder();
+        builder.LoadFromJson("""{ "Key": "Value" }""", CultureInfo.InvariantCulture);
+        var registry = builder.Build();
+
+        registry.TryGetTemplate("Key", CultureInfo.InvariantCulture, out var template).Should().BeTrue();
+        template.Should().Be("Value");
+    }
 }

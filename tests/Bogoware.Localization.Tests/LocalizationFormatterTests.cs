@@ -437,4 +437,37 @@ public class LocalizationFormatterTests
 
         result.Should().Be("TestPaymentError(FieldName=Amount, Detail=DI:XYZ)");
     }
+
+    // --- Circular reference detection ---
+
+    [Fact]
+    public void Format_CircularReference_ThrowsLocalizationFormattingException()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder().Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var a = new CircularRefA();
+        var b = new CircularRefB();
+        a.Other = b;
+        b.Other = a;
+
+        FluentActions.Invoking(() => formatter.Format(a))
+            .Should().Throw<LocalizationFormattingException>()
+            .WithMessage("*Circular reference*");
+    }
+
+    [Fact]
+    public void Format_SelfReference_ThrowsLocalizationFormattingException()
+    {
+        var registry = new InMemoryLocalizationRegistryBuilder().Build();
+        var formatter = new LocalizationFormatter(registry, EmptyServiceProvider());
+
+        var a = new CircularRefA();
+        var b = new CircularRefB { Other = a };
+        a.Other = b;
+
+        FluentActions.Invoking(() => formatter.Format(a))
+            .Should().Throw<LocalizationFormattingException>()
+            .WithMessage("*Circular reference*");
+    }
 }
