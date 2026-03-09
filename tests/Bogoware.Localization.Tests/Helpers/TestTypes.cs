@@ -285,3 +285,21 @@ public class TestInvalidCurrencyDiProvider : ILocalizationProvider<TestInvalidCu
     public string Localize(TestInvalidCurrencyError value, CultureInfo? culture = null)
         => $"DI:{value.CurrencyCode}";
 }
+
+/// <summary>
+/// Part of a circular reference pair (A → B → A) for testing cycle detection.
+/// Template placeholder: {Other}
+/// </summary>
+public class CircularRefA : ILocalizable
+{
+    public CircularRefB? Other { get; set; }
+}
+
+/// <summary>
+/// Part of a circular reference pair (B → A → B) for testing cycle detection.
+/// Template placeholder: {Other}
+/// </summary>
+public class CircularRefB : ILocalizable
+{
+    public CircularRefA? Other { get; set; }
+}

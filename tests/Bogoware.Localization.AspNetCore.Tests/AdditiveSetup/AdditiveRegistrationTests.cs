@@ -32,7 +32,7 @@ public sealed class AdditiveSetupFixture : WebApplicationFactory<Program>
 
             // Second call: adds an override for OrderStatus en-US (additive)
             services.AddBogowareLocalization(
-                registry: b => b.Build().LoadFromJson(
+                registry: b => b.LoadFromJson(
                     """{ "Bogoware.Localization.Sample.Api.Models.OrderStatus": "OVERRIDDEN: Order #{OrderNumber}" }""",
                     new CultureInfo("en-US")));
         });

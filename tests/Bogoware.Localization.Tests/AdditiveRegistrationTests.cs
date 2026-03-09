@@ -26,9 +26,9 @@ public class AdditiveRegistrationTests
         var services = new ServiceCollection();
 
         services.AddLocalization(b =>
-            b.Build().LoadFromJson(BaseJson, CultureInfo.InvariantCulture));
+            b.LoadFromJson(BaseJson, CultureInfo.InvariantCulture));
         services.AddLocalization(b =>
-            b.Build().LoadFromJson(OverrideJson, CultureInfo.InvariantCulture));
+            b.LoadFromJson(OverrideJson, CultureInfo.InvariantCulture));
 
         var sp = services.BuildServiceProvider();
         var registry = sp.GetRequiredService<ILocalizationRegistry>();
@@ -48,9 +48,9 @@ public class AdditiveRegistrationTests
         var services = new ServiceCollection();
 
         services.AddLocalization(b =>
-            b.Build().LoadFromJson(BaseJson, CultureInfo.InvariantCulture));
+            b.LoadFromJson(BaseJson, CultureInfo.InvariantCulture));
         services.AddLocalization(b =>
-            b.Build().LoadFromJson(OverrideJson, CultureInfo.InvariantCulture));
+            b.LoadFromJson(OverrideJson, CultureInfo.InvariantCulture));
 
         var sp = services.BuildServiceProvider();
         var registry = sp.GetRequiredService<ILocalizationRegistry>();
@@ -66,9 +66,9 @@ public class AdditiveRegistrationTests
         var services = new ServiceCollection();
 
         services.AddLocalization(b =>
-            b.Build().LoadFromJson(BaseJson, CultureInfo.InvariantCulture));
+            b.LoadFromJson(BaseJson, CultureInfo.InvariantCulture));
         services.AddLocalization(b =>
-            b.Build().LoadFromJson(OverrideJson, CultureInfo.InvariantCulture));
+            b.LoadFromJson(OverrideJson, CultureInfo.InvariantCulture));
 
         var sp = services.BuildServiceProvider();
         var registry = sp.GetRequiredService<ILocalizationRegistry>();
@@ -119,11 +119,11 @@ public class AdditiveRegistrationTests
         var services = new ServiceCollection();
 
         services.AddLocalization(b =>
-            b.Build().LoadFromJson(BaseJson, CultureInfo.InvariantCulture));
+            b.LoadFromJson(BaseJson, CultureInfo.InvariantCulture));
         services.AddLocalization(b =>
-            b.Build().LoadFromJson(OverrideJson, CultureInfo.InvariantCulture));
+            b.LoadFromJson(OverrideJson, CultureInfo.InvariantCulture));
         services.AddLocalization(b =>
-            b.Build().LoadFromJson("{}", CultureInfo.InvariantCulture));
+            b.LoadFromJson("{}", CultureInfo.InvariantCulture));
 
         services.Count(d => d.ServiceType == typeof(ILocalizationRegistry)).Should().Be(1);
         services.Count(d => d.ServiceType == typeof(ILocalizationFormatter)).Should().Be(1);
@@ -138,11 +138,11 @@ public class AdditiveRegistrationTests
 
         var services = new ServiceCollection();
         services.AddLocalization(b =>
-            b.Build().LoadFromJson(layer1, CultureInfo.InvariantCulture));
+            b.LoadFromJson(layer1, CultureInfo.InvariantCulture));
         services.AddLocalization(b =>
-            b.Build().LoadFromJson(layer2, CultureInfo.InvariantCulture));
+            b.LoadFromJson(layer2, CultureInfo.InvariantCulture));
         services.AddLocalization(b =>
-            b.Build().LoadFromJson(layer3, CultureInfo.InvariantCulture));
+            b.LoadFromJson(layer3, CultureInfo.InvariantCulture));
 
         var sp = services.BuildServiceProvider();
         var registry = sp.GetRequiredService<ILocalizationRegistry>();

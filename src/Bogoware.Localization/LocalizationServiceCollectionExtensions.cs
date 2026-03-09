@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Bogoware.Localization;
@@ -36,32 +37,28 @@ public static class LocalizationServiceCollectionExtensions
     public static IServiceCollection AddLocalization(
         this IServiceCollection services, Action<JsonLocalizationRegistryBuilder> configure)
     {
-        // Retrieve or create the configurator that accumulates builder delegates.
-        var configurator = (LocalizationRegistryConfigurator?)services
-            .FirstOrDefault(d => d.ServiceType == typeof(LocalizationRegistryConfigurator))
-            ?.ImplementationInstance;
+        // Each call registers its configure delegate as an individual singleton.
+        // All delegates are collected at resolution time via GetServices<>.
+        services.AddSingleton(new LocalizationRegistryAction(configure));
 
-        if (configurator is null)
+        // Factory registrations are added at most once via TryAddSingleton.
+        services.TryAddSingleton<ILocalizationRegistry>(sp =>
         {
-            configurator = new LocalizationRegistryConfigurator();
-            services.AddSingleton(configurator);
+            var actions = sp.GetServices<LocalizationRegistryAction>();
+            var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<JsonLocalizationRegistryBuilder>();
+            var builder = new JsonLocalizationRegistryBuilder(logger);
+            foreach (var action in actions)
+                action.Apply(builder);
+            return builder.Build();
+        });
 
-            services.AddSingleton<ILocalizationRegistry>(sp =>
-            {
-                var cfg = sp.GetRequiredService<LocalizationRegistryConfigurator>();
-                var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<JsonLocalizationRegistryBuilder>();
-                return cfg.Build(logger);
-            });
+        services.TryAddSingleton<ILocalizationFormatter>(sp =>
+        {
+            var registry = sp.GetRequiredService<ILocalizationRegistry>();
+            var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<LocalizationFormatter>();
+            return new LocalizationFormatter(registry, sp, logger);
+        });
 
-            services.AddSingleton<ILocalizationFormatter>(sp =>
-            {
-                var registry = sp.GetRequiredService<ILocalizationRegistry>();
-                var logger = sp.GetService<ILoggerFactory>()?.CreateLogger<LocalizationFormatter>();
-                return new LocalizationFormatter(registry, sp, logger);
-            });
-        }
-
-        configurator.Add(configure);
         return services;
     }
 

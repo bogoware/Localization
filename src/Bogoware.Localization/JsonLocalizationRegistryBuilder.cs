@@ -26,6 +26,22 @@ public class JsonLocalizationRegistryBuilder(ILogger? logger = null)
 {
     private static readonly string[] DefaultPatterns = ["localized-messages", "error-messages"];
     private readonly JsonLocalizationRegistry _registry = new(logger);
+    private bool _built;
+
+    /// <summary>
+    /// Loads message templates from a JSON or JSONC string for the specified culture.
+    /// Convenience method that delegates to <see cref="JsonLocalizationRegistry.LoadFromJson"/>.
+    /// </summary>
+    /// <param name="json">A JSON object mapping FQDNs to format template strings.</param>
+    /// <param name="culture">The culture these templates belong to.</param>
+    /// <param name="source">Descriptive source for diagnostic logging.</param>
+    /// <returns>This builder instance for fluent chaining.</returns>
+    public JsonLocalizationRegistryBuilder LoadFromJson(string json, CultureInfo culture, string source = "inline")
+    {
+        ThrowIfBuilt();
+        _registry.LoadFromJson(json, culture, source);
+        return this;
+    }
 
     /// <summary>
     /// Scans embedded resources in the given assembly for JSON files matching the provided patterns
@@ -44,6 +60,7 @@ public class JsonLocalizationRegistryBuilder(ILogger? logger = null)
     /// </remarks>
     public JsonLocalizationRegistryBuilder AddFromAssembly(Assembly assembly, params string[] patterns)
     {
+        ThrowIfBuilt();
         var effectivePatterns = patterns.Length > 0 ? patterns : DefaultPatterns;
 
         var resourceNames = assembly.GetManifestResourceNames()
@@ -89,6 +106,7 @@ public class JsonLocalizationRegistryBuilder(ILogger? logger = null)
     /// </remarks>
     public JsonLocalizationRegistryBuilder AddFromAssemblyTree(Assembly root, params string[] patterns)
     {
+        ThrowIfBuilt();
         var visited = new HashSet<string>();
         var ordered = new List<Assembly>();
         CollectReferences(root, visited, ordered);
@@ -119,6 +137,7 @@ public class JsonLocalizationRegistryBuilder(ILogger? logger = null)
     /// </remarks>
     public JsonLocalizationRegistryBuilder AddFromLoadedAssemblies(string[] prefixes, params string[] patterns)
     {
+        ThrowIfBuilt();
         var assemblies = AppDomain.CurrentDomain.GetAssemblies()
             .Where(a => prefixes.Any(p => a.GetName().Name?.StartsWith(p, StringComparison.Ordinal) == true))
             // Approximate topological order: assemblies with fewer references tend to be
@@ -143,6 +162,7 @@ public class JsonLocalizationRegistryBuilder(ILogger? logger = null)
     /// <returns>This builder instance for fluent chaining.</returns>
     public JsonLocalizationRegistryBuilder AddFromFile(string path, CultureInfo culture)
     {
+        ThrowIfBuilt();
         string json;
         try
         {
@@ -169,6 +189,7 @@ public class JsonLocalizationRegistryBuilder(ILogger? logger = null)
     /// <returns>This builder instance for fluent chaining.</returns>
     public JsonLocalizationRegistryBuilder AddFromAssemblies(IEnumerable<Assembly> assemblies, params string[] patterns)
     {
+        ThrowIfBuilt();
         foreach (var assembly in assemblies)
             AddFromAssembly(assembly, patterns);
 
@@ -179,7 +200,20 @@ public class JsonLocalizationRegistryBuilder(ILogger? logger = null)
     /// Builds the <see cref="JsonLocalizationRegistry"/> with all loaded templates.
     /// </summary>
     /// <returns>A fully populated <see cref="JsonLocalizationRegistry"/>.</returns>
-    public JsonLocalizationRegistry Build() => _registry;
+    public JsonLocalizationRegistry Build()
+    {
+        ThrowIfBuilt();
+        _built = true;
+        return _registry;
+    }
+
+    private void ThrowIfBuilt()
+    {
+        if (_built)
+            throw new InvalidOperationException(
+                $"{nameof(JsonLocalizationRegistryBuilder)} has already been built and cannot be reused. " +
+                "Create a new builder instance instead.");
+    }
 
     private static void CollectReferences(Assembly assembly, HashSet<string> visited, List<Assembly> ordered)
     {
