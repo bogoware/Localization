@@ -9,6 +9,10 @@ export default defineConfig({
     starlight({
       title: 'Bogoware.Localization',
       tagline: 'Lightweight, FQDN-keyed localization for .NET',
+      logo: {
+        src: './src/assets/logo-favicon.svg',
+        replacesTitle: false,
+      },
       plugins: [
         bogowareTheme({
           mode: 'architect',
