@@ -1,10 +1,11 @@
 ---
 title: ASP.NET Core Integration
+description: Wire Bogoware.Localization into the ASP.NET Core pipeline with per-request culture and automatic JSON localization
 sidebar:
   order: 4
 ---
 
-# ASP.NET Core Integration
+import { Aside, Steps, LinkCard } from '@astrojs/starlight/components';
 
 The `Bogoware.Localization.AspNetCore` package wires localization into the ASP.NET Core pipeline transparently. JSON responses containing `ILocalizable` properties are automatically localized based on the request's culture, with zero per-request overhead.
 
@@ -29,31 +30,43 @@ dotnet add package Bogoware.Localization.AspNetCore
 
 ## Quick Start
 
-```csharp
-using Bogoware.Localization.AspNetCore;
+<Steps>
 
-var builder = WebApplication.CreateBuilder(args);
+1. **Configure services and middleware**
 
-builder.Services.AddBogowareLocalization(typeof(Program).Assembly);
+   ```csharp
+   using Bogoware.Localization.AspNetCore;
 
-var app = builder.Build();
-app.UseBogowareLocalization();
+   var builder = WebApplication.CreateBuilder(args);
 
-app.MapGet("/api/orders/{id}", (int id) =>
-    Results.Ok(new OrderResponse(id, new OrderStatus(id, "Shipped"), 42.99m)));
+   builder.Services.AddBogowareLocalization(typeof(Program).Assembly);
 
-app.Run();
-```
+   var app = builder.Build();
+   app.UseBogowareLocalization();
+   ```
 
-```bash
-# English (default)
-curl -H "Accept-Language: en-US" http://localhost:5000/api/orders/42
-# -> {"id":42,"status":"Order #42 is Shipped","total":42.99}
+2. **Define endpoints with localizable responses**
 
-# Italian
-curl -H "Accept-Language: it-IT" http://localhost:5000/api/orders/42
-# -> {"id":42,"status":"L'ordine #42 e Shipped","total":42.99}
-```
+   ```csharp
+   app.MapGet("/api/orders/{id}", (int id) =>
+       Results.Ok(new OrderResponse(id, new OrderStatus(id, "Shipped"), 42.99m)));
+
+   app.Run();
+   ```
+
+3. **Test with different cultures**
+
+   ```bash
+   # English (default)
+   curl -H "Accept-Language: en-US" http://localhost:5000/api/orders/42
+   # -> {"id":42,"status":"Order #42 is Shipped","total":42.99}
+
+   # Italian
+   curl -H "Accept-Language: it-IT" http://localhost:5000/api/orders/42
+   # -> {"id":42,"status":"L'ordine #42 e Shipped","total":42.99}
+   ```
+
+</Steps>
 
 ## Configuration Reference
 
@@ -171,9 +184,9 @@ curl -X POST -H "Accept-Language: it-IT" http://localhost:5000/api/orders
 }
 ```
 
-:::note
+<Aside type="note">
 Title and Detail remain developer-controlled — only `Extensions` values are localized.
-:::
+</Aside>
 
 ## Coexistence with Framework Localization
 
@@ -225,9 +238,9 @@ options.IncludePaths.Add("/api/");
 options.ExcludePaths.Add("/api/health");
 ```
 
-:::caution
+<Aside type="caution" title="Performance impact">
 Response buffering adds per-request overhead (read, parse, re-serialize). Most applications should NOT need this — Layer 1 (PostConfigure on `JsonOptions`) handles standard minimal API and MVC responses automatically.
-:::
+</Aside>
 
 ## Complete Example
 
@@ -280,3 +293,8 @@ public record OrderResponse(int Id, OrderStatus Status, decimal Total);
   "MyApp.OrderStatus": "L'ordine #{OrderNumber} e {Status}"
 }
 ```
+
+## Related
+
+<LinkCard title="JSON Serialization" description="Understand the three serialization modes and attribute controls" href="/Localization/guides/json-serialization/" />
+<LinkCard title="JSON Templates" description="Create and organize JSON template files" href="/Localization/guides/json-templates/" />

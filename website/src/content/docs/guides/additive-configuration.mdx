@@ -1,10 +1,11 @@
 ---
 title: Additive Configuration
+description: Layer localization templates from multiple sources with last-loaded-wins override semantics
 sidebar:
   order: 5
 ---
 
-# Additive Configuration
+import { Aside, LinkCard } from '@astrojs/starlight/components';
 
 ## Overview
 
@@ -174,3 +175,8 @@ Each template registration carries a `Source` descriptor:
 3. Enable `Warning`-level logging during development to catch unintended overrides.
 4. Use `Debug`-level logging to trace which assemblies and resources are loaded.
 5. Keep override files small — only include the keys you want to change.
+
+## Related
+
+<LinkCard title="JSON Templates" description="Template file format, organization strategies, and loading methods" href="/Localization/guides/json-templates/" />
+<LinkCard title="Localization Registry" description="How the registry stores and resolves template mappings" href="/Localization/concepts/localization-registry/" />

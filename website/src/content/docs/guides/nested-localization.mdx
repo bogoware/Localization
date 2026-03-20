@@ -1,10 +1,11 @@
 ---
 title: Nested Localization
+description: Recursive formatting of nested ILocalizable properties through the full resolution chain
 sidebar:
   order: 6
 ---
 
-# Nested Localization
+import { Aside, LinkCard } from '@astrojs/starlight/components';
 
 When a localizable type has a property that is itself `ILocalizable`, the formatter recurses automatically — each nested value goes through the full resolution chain.
 
@@ -67,6 +68,12 @@ formatter.Format(error);
 
 The fallback itself also recurses — if a fallback property is `ILocalizable`, it gets formatted through the resolution chain too.
 
-:::tip
+<Aside type="tip" title="Culture propagation">
 Culture is propagated through the entire nesting chain. A single `Format(error, culture)` call ensures every nested `ILocalizable` is formatted with the same culture.
-:::
+</Aside>
+
+## Related
+
+<LinkCard title="Provider Chain" description="The four-step resolution order applied at each nesting level" href="/Localization/concepts/provider-chain/" />
+<LinkCard title="Localizable Types" description="Define types that participate in nested localization" href="/Localization/concepts/localizable-types/" />
+<LinkCard title="JSON Serialization" description="Nested ILocalizable properties are also handled during serialization" href="/Localization/guides/json-serialization/" />

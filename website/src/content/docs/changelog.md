@@ -1,10 +1,9 @@
 ---
 title: Changelog
+description: Release history and notable changes for Bogoware.Localization
 sidebar:
   order: 2
 ---
-
-# Changelog
 
 All notable changes to this project will be documented in this file.
 

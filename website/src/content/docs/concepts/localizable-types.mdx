@@ -1,10 +1,11 @@
 ---
 title: Localizable Types
+description: Define localizable types using the ILocalizable marker interface for type-safe localization
 sidebar:
   order: 1
 ---
 
-# Localizable Types
+import { LinkCard } from '@astrojs/starlight/components';
 
 The `ILocalizable` interface is a marker interface that opts a type into the localization system. Any class implementing `ILocalizable` can be formatted by the `ILocalizationFormatter`.
 
@@ -58,3 +59,9 @@ This is the highest priority in the [provider resolution chain](./provider-chain
 ## JSON Serialization
 
 `ILocalizable` types are automatically localized during JSON serialization when using Auto mode (the default). Instead of being serialized as objects with their public properties, they are converted to localized strings via the formatter. See the [JSON Serialization guide](../guides/json-serialization) for setup and configuration options.
+
+## Related
+
+<LinkCard title="Provider Chain" description="Understand the full resolution order for localized strings" href="/Localization/concepts/provider-chain/" />
+<LinkCard title="JSON Templates" description="Create and organize JSON template files" href="/Localization/guides/json-templates/" />
+<LinkCard title="JSON Serialization" description="Localize properties during JSON serialization" href="/Localization/guides/json-serialization/" />

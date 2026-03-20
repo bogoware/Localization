@@ -1,10 +1,9 @@
 ---
 title: Culture Fallback
+description: How the localization registry walks up the culture hierarchy to resolve templates
 sidebar:
   order: 4
 ---
-
-# Culture Fallback
 
 When resolving a template from the registry, the localization system walks up the culture hierarchy until it finds a match.
 

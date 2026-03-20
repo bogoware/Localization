@@ -1,10 +1,11 @@
 ---
 title: JSON Serialization
+description: Automatically localize ILocalizable properties during JSON serialization with three configurable modes
 sidebar:
   order: 3
 ---
 
-# JSON Serialization
+import { Tabs, TabItem, Aside, LinkCard } from '@astrojs/starlight/components';
 
 When DTOs contain `ILocalizable` properties, default JSON serialization emits them as objects with all public properties. The serialization feature converts them to localized strings automatically — so your API responses contain human-readable messages instead of raw property bags.
 
@@ -33,62 +34,62 @@ The `mode` parameter controls which properties get localized:
 | **Auto** (default) | All `ILocalizable` properties + `[Localize]`-marked ones | Most applications |
 | **Exhaustive** | Every property attempted via `ILocalizationFormatter.Format<T>()` | Debugging and testing |
 
-### Explicit Mode
+<Tabs>
+  <TabItem label="Explicit">
+    Only properties decorated with `[Localize]` are localized. Everything else serializes normally:
 
-Only properties decorated with `[Localize]` are localized. Everything else serializes normally:
+    ```csharp
+    options.AddLocalization(formatter, LocalizationSerializationMode.Explicit);
+    ```
 
-```csharp
-options.AddLocalization(formatter, LocalizationSerializationMode.Explicit);
-```
+    ```csharp
+    public class ApiResponse
+    {
+        public int Code { get; set; }
 
-```csharp
-public class ApiResponse
-{
-    public int Code { get; set; }
+        [Localize]
+        public RequiredFieldError? UserMessage { get; set; }
 
-    [Localize]
-    public RequiredFieldError? UserMessage { get; set; }
+        // No attribute -> serialized as object
+        public RequiredFieldError? InternalError { get; set; }
+    }
+    ```
 
-    // No attribute -> serialized as object
-    public RequiredFieldError? InternalError { get; set; }
-}
-```
+    ```json
+    {
+      "Code": 400,
+      "UserMessage": "'Email' is required",
+      "InternalError": { "FieldName": "Email" }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Auto (Default)">
+    All `ILocalizable` properties are localized automatically. Use `[Localize]` to opt in non-`ILocalizable` types (that have a registered DI provider), and `[DoNotLocalize]` to opt out specific properties:
 
-```json
-{
-  "Code": 400,
-  "UserMessage": "'Email' is required",
-  "InternalError": { "FieldName": "Email" }
-}
-```
+    ```csharp
+    options.AddLocalization(formatter); // Auto is the default
+    ```
 
-### Auto Mode (Default)
+    ```json
+    {
+      "StatusCode": 400,
+      "Error": "'Email' is required",
+      "Warnings": ["'Name' is required", "'Bio' must not exceed 200 characters"]
+    }
+    ```
+  </TabItem>
+  <TabItem label="Exhaustive">
+    Attempts localization on every property. Falls back to default serialization for types without a registered provider. Primitive types (int, string, etc.) are never localized.
 
-All `ILocalizable` properties are localized automatically. Use `[Localize]` to opt in non-`ILocalizable` types (that have a registered DI provider), and `[DoNotLocalize]` to opt out specific properties:
+    ```csharp
+    options.AddLocalization(formatter, LocalizationSerializationMode.Exhaustive);
+    ```
 
-```csharp
-options.AddLocalization(formatter); // Auto is the default
-```
-
-```json
-{
-  "StatusCode": 400,
-  "Error": "'Email' is required",
-  "Warnings": ["'Name' is required", "'Bio' must not exceed 200 characters"]
-}
-```
-
-### Exhaustive Mode
-
-Attempts localization on every property. Falls back to default serialization for types without a registered provider. Primitive types (int, string, etc.) are never localized.
-
-```csharp
-options.AddLocalization(formatter, LocalizationSerializationMode.Exhaustive);
-```
-
-:::caution
-**Performance:** Exhaustive mode calls `ILocalizationFormatter.Format<T>()` on every property, which involves DI service resolution and reflection. Use only for debugging or testing — not recommended for production workloads.
-:::
+    <Aside type="caution" title="Performance warning">
+    Exhaustive mode calls `ILocalizationFormatter.Format<T>()` on every property, which involves DI service resolution and reflection. Use only for debugging or testing — not recommended for production workloads.
+    </Aside>
+  </TabItem>
+</Tabs>
 
 ## Attributes
 
@@ -161,9 +162,9 @@ To lock serialization to a specific culture, pass it explicitly:
 options.AddLocalization(formatter, culture: new CultureInfo("it-IT"));
 ```
 
-:::tip
+<Aside type="tip" title="ASP.NET Core culture handling">
 In ASP.NET, leave `culture` as `null` (the default) so that request-level culture middleware controls the output language automatically.
-:::
+</Aside>
 
 ## ASP.NET Core Integration
 
@@ -183,3 +184,8 @@ See the [ASP.NET Core Integration](./aspnetcore-integration) guide for full conf
 - Serialization is **write-only** — deserializing a localized JSON back into the original DTO will throw `NotSupportedException`, since the localized string cannot be reversed into a typed object.
 - Null `ILocalizable` properties serialize as JSON `null`.
 - See [localizable types](../concepts/localizable-types) for how to define types that participate in localization, and the [provider chain](../concepts/provider-chain) for the full resolution order.
+
+## Related
+
+<LinkCard title="Localizable Types" description="Define types that participate in localization" href="/Localization/concepts/localizable-types/" />
+<LinkCard title="ASP.NET Core Integration" description="Automatic JSON localization in the ASP.NET Core pipeline" href="/Localization/guides/aspnetcore-integration/" />

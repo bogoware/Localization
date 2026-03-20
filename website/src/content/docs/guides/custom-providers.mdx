@@ -1,10 +1,11 @@
 ---
 title: Custom Providers
+description: Implement custom localization providers for dynamic content, DI-based logic, and generic types
 sidebar:
   order: 2
 ---
 
-# Custom Providers
+import { Aside, LinkCard } from '@astrojs/starlight/components';
 
 While JSON templates cover most use cases, you can implement custom localization providers for more complex scenarios.
 
@@ -61,9 +62,9 @@ Register in DI:
 services.AddSingleton<ILocalizationProvider<OrderError>, RichOrderErrorProvider>();
 ```
 
-:::tip
+<Aside type="tip" title="Fallthrough behavior">
 Return `null` from a DI provider to let the resolution chain continue to the registry or fallback.
-:::
+</Aside>
 
 ## When to Use Custom Providers
 
@@ -74,3 +75,9 @@ Return `null` from a DI provider to let the resolution chain continue to the reg
 | Type-specific logic with DI dependencies | `ILocalizationProvider<T>` |
 | Generic types (e.g. `Result<T>`) | `ILocalizationProvider` or `ILocalizationProvider<T>` |
 | Testing | `InMemoryLocalizationRegistry` |
+
+## Related
+
+<LinkCard title="Provider Chain" description="Understand the full four-step resolution order" href="/Localization/concepts/provider-chain/" />
+<LinkCard title="Localizable Types" description="Define types that participate in the localization system" href="/Localization/concepts/localizable-types/" />
+<LinkCard title="JSON Templates" description="The standard template-based approach for most use cases" href="/Localization/guides/json-templates/" />

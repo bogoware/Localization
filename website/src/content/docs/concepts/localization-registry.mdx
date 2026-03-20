@@ -1,10 +1,11 @@
 ---
 title: Localization Registry
+description: Store and load localized template mappings using JSON or in-memory registries
 sidebar:
   order: 2
 ---
 
-# Localization Registry
+import { Aside, LinkCard } from '@astrojs/starlight/components';
 
 The `ILocalizationRegistry` stores mappings from type full names to localized template strings, organized by culture.
 
@@ -42,9 +43,9 @@ Mark your JSON files as embedded resources in your `.csproj`:
 </ItemGroup>
 ```
 
-:::note
+<Aside type="note">
 The `WithCulture="false"` attribute prevents MSBuild from routing the files into satellite assemblies.
-:::
+</Aside>
 
 Then register the assembly containing the resources:
 
@@ -52,9 +53,9 @@ Then register the assembly containing the resources:
 services.AddLocalization(typeof(MyType).Assembly);
 ```
 
-:::tip
+<Aside type="tip">
 `AddLocalization` is additive — multiple calls accumulate templates, with later registrations overriding earlier ones on conflict. See the [Additive Configuration guide](../guides/additive-configuration) for details.
-:::
+</Aside>
 
 ## In-Memory Registry
 
@@ -66,3 +67,8 @@ var registry = new InMemoryLocalizationRegistryBuilder()
     .AddTemplate("it-IT", "MyApp.Errors.RequiredFieldError", "'{FieldName}' è obbligatorio")
     .Build();
 ```
+
+## Related
+
+<LinkCard title="JSON Templates" description="Create, organize, and load JSON template files" href="/Localization/guides/json-templates/" />
+<LinkCard title="Additive Configuration" description="Layer templates from multiple sources with override semantics" href="/Localization/guides/additive-configuration/" />

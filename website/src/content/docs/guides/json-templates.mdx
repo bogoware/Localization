@@ -1,10 +1,11 @@
 ---
 title: JSON Templates
+description: Create, organize, and load JSON template files for type-safe localization
 sidebar:
   order: 1
 ---
 
-# Working with JSON Templates
+import { Tabs, TabItem, Aside, FileTree, LinkCard } from '@astrojs/starlight/components';
 
 This guide covers how to create, organize, and load JSON template files for localization.
 
@@ -68,9 +69,9 @@ For JSON-based localization, generic types require the exact `Type.FullName` str
 
 See the [Custom Providers guide](./custom-providers) for implementation details on both provider approaches
 
-:::tip
+<Aside type="tip" title="Discovering generic type keys">
 If you must use a generic type key in JSON, you can discover the exact key at runtime via `typeof(MyType<MyArg>).FullName` and copy it into your template file.
-:::
+</Aside>
 
 ## JSONC Support
 
@@ -109,109 +110,108 @@ A single JSONC file can use comments as section headers to keep related template
 }
 ```
 
-:::tip[Editor support]
+<Aside type="tip" title="Editor support">
 If your editor doesn't highlight comments in `.json` files, rename the file to `.jsonc` or set the file association to "JSON with Comments" in your editor settings. The library reads both extensions identically.
-:::
+</Aside>
 
 ## Organizing Templates
 
-### Single File with Module Sections
+<Tabs>
+  <TabItem label="Single File">
+    The simplest approach: keep all templates in one JSONC file and use comments as section dividers (as shown above). This works well for small-to-medium projects where a single file stays manageable.
+  </TabItem>
+  <TabItem label="By Use Case">
+    For larger applications, split templates into separate files by category. The library ships with two default resource name patterns — `localized-messages` and `error-messages` — that are discovered automatically:
 
-The simplest approach: keep all templates in one JSONC file and use comments as section dividers (as shown above). This works well for small-to-medium projects where a single file stays manageable.
+    <FileTree>
+    - Resources/
+      - error-messages.json Validation and system errors
+      - error-messages.it-IT.json
+      - localized-messages.json User-facing labels and notifications
+      - localized-messages.it-IT.json
+    </FileTree>
 
-### By Use Case
+    `error-messages.json`:
+    ```jsonc
+    {
+      // Validation errors returned in ProblemDetails responses
+      "MyApp.Validation.RequiredFieldError": "'{FieldName}' is required",
+      "MyApp.Validation.MaxLengthError": "'{FieldName}' must not exceed {MaxLength} characters",
 
-For larger applications, split templates into separate files by category. The library ships with two default resource name patterns — `localized-messages` and `error-messages` — that are discovered automatically:
+      // System errors
+      "MyApp.System.ServiceUnavailable": "The {ServiceName} service is temporarily unavailable",
+    }
+    ```
 
-```
-Resources/
-├── error-messages.json               # Validation and system errors
-├── error-messages.it-IT.json
-├── localized-messages.json           # User-facing labels and notifications
-└── localized-messages.it-IT.json
-```
+    `localized-messages.json`:
+    ```jsonc
+    {
+      // Order status messages shown in API responses
+      "MyApp.Orders.OrderStatus": "Order #{OrderNumber} is {Status}",
+      "MyApp.Orders.OrderShipped": "Your order #{OrderNumber} has shipped",
 
-`error-messages.json`:
-```jsonc
-{
-  // Validation errors returned in ProblemDetails responses
-  "MyApp.Validation.RequiredFieldError": "'{FieldName}' is required",
-  "MyApp.Validation.MaxLengthError": "'{FieldName}' must not exceed {MaxLength} characters",
+      // Notification templates
+      "MyApp.Notifications.WelcomeMessage": "Welcome, {UserName}!",
+    }
+    ```
 
-  // System errors
-  "MyApp.System.ServiceUnavailable": "The {ServiceName} service is temporarily unavailable",
-}
-```
+    Both files are loaded automatically with a single call:
 
-`localized-messages.json`:
-```jsonc
-{
-  // Order status messages shown in API responses
-  "MyApp.Orders.OrderStatus": "Order #{OrderNumber} is {Status}",
-  "MyApp.Orders.OrderShipped": "Your order #{OrderNumber} has shipped",
+    ```csharp
+    // Loads both localized-messages.*.json and error-messages.*.json
+    builder.AddFromAssembly(typeof(Program).Assembly);
+    ```
 
-  // Notification templates
-  "MyApp.Notifications.WelcomeMessage": "Welcome, {UserName}!",
-}
-```
+    You can also add **custom file categories** (e.g. `notification-messages`) by supplying custom patterns:
 
-Both files are loaded automatically with a single call:
+    ```csharp
+    builder.AddFromAssembly(typeof(Program).Assembly,
+        "localized-messages", "error-messages", "notification-messages");
+    ```
+  </TabItem>
+  <TabItem label="By Culture">
+    Create one file per culture. The library determines culture from the filename segment before `.json`:
 
-```csharp
-// Loads both localized-messages.*.json and error-messages.*.json
-builder.AddFromAssembly(typeof(Program).Assembly);
-```
+    <FileTree>
+    - Resources/
+      - localized-messages.json Invariant (fallback)
+      - localized-messages.en-US.json English (US)
+      - localized-messages.it-IT.json Italian
+      - localized-messages.de-DE.json German
+    </FileTree>
 
-You can also add **custom file categories** (e.g. `notification-messages`) by supplying custom patterns:
+    The culture fallback chain is: **exact culture → parent culture → invariant culture**. For example, a request for `it-IT` will try `it-IT`, then `it`, then invariant.
+  </TabItem>
+  <TabItem label="By Assembly">
+    For multi-project solutions, each assembly can own its own templates. Register them individually or scan by prefix:
 
-```csharp
-builder.AddFromAssembly(typeof(Program).Assembly,
-    "localized-messages", "error-messages", "notification-messages");
-```
+    ```csharp
+    // Shorthand: uses default resource patterns (localized-messages, error-messages)
+    services.AddLocalization(typeof(OrderError).Assembly, typeof(AuthError).Assembly);
+    ```
 
-### By Culture
+    Or use `AddFromAssemblyTree` to automatically scan an assembly and all its transitive dependencies:
 
-Create one file per culture. The library determines culture from the filename segment before `.json`:
+    ```csharp
+    services.AddLocalization(builder =>
+    {
+        builder.AddFromAssemblyTree(typeof(Program).Assembly);
+    });
+    ```
 
-```
-Resources/
-├── localized-messages.json           # Invariant (fallback)
-├── localized-messages.en-US.json     # English (US)
-├── localized-messages.it-IT.json     # Italian
-└── localized-messages.de-DE.json     # German
-```
+    Or use `AddFromLoadedAssemblies` to scan all loaded assemblies whose name starts with given prefixes:
 
-The culture fallback chain is: **exact culture → parent culture → invariant culture**. For example, a request for `it-IT` will try `it-IT`, then `it`, then invariant.
+    ```csharp
+    services.AddLocalization(builder =>
+    {
+        // Scans all loaded assemblies whose name starts with "MyApp."
+        builder.AddFromLoadedAssemblies(["MyApp."]);
+    });
+    ```
 
-### By Assembly / Domain
-
-For multi-project solutions, each assembly can own its own templates. Register them individually or scan by prefix:
-
-```csharp
-// Shorthand: uses default resource patterns (localized-messages, error-messages)
-services.AddLocalization(typeof(OrderError).Assembly, typeof(AuthError).Assembly);
-```
-
-Or use `AddFromAssemblyTree` to automatically scan an assembly and all its transitive dependencies:
-
-```csharp
-services.AddLocalization(builder =>
-{
-    builder.AddFromAssemblyTree(typeof(Program).Assembly);
-});
-```
-
-Or use `AddFromLoadedAssemblies` to scan all loaded assemblies whose name starts with given prefixes:
-
-```csharp
-services.AddLocalization(builder =>
-{
-    // Scans all loaded assemblies whose name starts with "MyApp."
-    builder.AddFromLoadedAssemblies(["MyApp."]);
-});
-```
-
-Assemblies are loaded in dependency order (fewest references first), so base libraries provide defaults and higher-level assemblies can override specific keys.
+    Assemblies are loaded in dependency order (fewest references first), so base libraries provide defaults and higher-level assemblies can override specific keys.
+  </TabItem>
+</Tabs>
 
 ## Combining Multiple Sources
 
@@ -347,6 +347,12 @@ Add the JSON files as embedded resources in your `.csproj`:
 </ItemGroup>
 ```
 
-:::tip
+<Aside type="tip" title="Satellite assembly prevention">
 Use `WithCulture="false"` to prevent MSBuild from routing culture-specific files into satellite assemblies. The localization library handles culture resolution internally.
-:::
+</Aside>
+
+## Related
+
+<LinkCard title="Additive Configuration" description="Layer templates from multiple sources with override semantics" href="/Localization/guides/additive-configuration/" />
+<LinkCard title="Custom Providers" description="Implement providers for scenarios beyond JSON templates" href="/Localization/guides/custom-providers/" />
+<LinkCard title="ASP.NET Core Integration" description="Wire localization into the ASP.NET Core pipeline" href="/Localization/guides/aspnetcore-integration/" />
