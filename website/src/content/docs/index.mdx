@@ -5,6 +5,8 @@ template: splash
 hero:
   title: Bogoware.Localization
   tagline: Lightweight, FQDN-keyed localization for .NET
+  image:
+    html: <img src="/Localization/hero-logo.svg" alt="Bogoware logo" style="width:280px;height:280px;filter:drop-shadow(0 0 40px rgba(99,102,241,0.4)) drop-shadow(0 0 80px rgba(139,92,246,0.2));" />
   actions:
     - text: Get Started
       link: /Localization/getting-started/installation/
@@ -14,7 +16,7 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import { CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
 
 _A .NET localization library where **each message is a class** — its name is the key, its properties are the placeholders._
 
@@ -88,30 +90,14 @@ dotnet add package Bogoware.Localization
 ## Key Features
 
 <CardGrid>
-  <Card title="Class-based message modeling" icon="pencil">
-    The type name is the key, properties are the placeholders.
-  </Card>
-  <Card title="Culture fallback chain" icon="translate">
-    Exact culture, parent culture, then invariant culture.
-  </Card>
-  <Card title="Resolution chain" icon="list-format">
-    Self-provider, DI provider, registry template, then fallback format.
-  </Card>
-  <Card title="Nested localization" icon="random">
-    `ILocalizable` properties are formatted recursively through the full chain.
-  </Card>
-  <Card title="JSON registry" icon="document">
-    Load templates from embedded resources, files, or raw JSON strings.
-  </Card>
-  <Card title="JSON serialization converters" icon="setting">
-    Localize properties during serialization automatically.
-  </Card>
-  <Card title="DI integration" icon="puzzle">
-    `IServiceCollection.AddLocalization()` extension methods.
-  </Card>
-  <Card title="ASP.NET Core integration" icon="rocket">
-    Per-request culture resolution, JSON response localization, and ProblemDetails support.
-  </Card>
+  <LinkCard title="Localizable Types" description="The type name is the key, properties are the placeholders." href="/Localization/concepts/localizable-types/" />
+  <LinkCard title="Culture Fallback" description="Exact culture → parent culture → invariant culture." href="/Localization/concepts/culture-fallback/" />
+  <LinkCard title="Provider Resolution Chain" description="Self-provider, DI provider, registry template, then fallback format." href="/Localization/concepts/provider-chain/" />
+  <LinkCard title="Nested Localization" description="ILocalizable properties are formatted recursively through the full chain." href="/Localization/guides/nested-localization/" />
+  <LinkCard title="JSON Templates" description="Load templates from embedded resources, files, or raw JSON strings." href="/Localization/guides/json-templates/" />
+  <LinkCard title="JSON Serialization" description="Localize properties during serialization automatically." href="/Localization/guides/json-serialization/" />
+  <LinkCard title="Custom Providers" description="ILocalizationProvider for self-providing and DI-based localization." href="/Localization/guides/custom-providers/" />
+  <LinkCard title="ASP.NET Core Integration" description="Per-request culture, JSON response localization, and ProblemDetails support." href="/Localization/guides/aspnetcore-integration/" />
 </CardGrid>
 
 ## Next Steps
