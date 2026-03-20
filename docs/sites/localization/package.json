@@ -11,7 +11,7 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.1",
     "@astrojs/starlight": "^0.30.0",
-    "@bogoware/starlight-theme": "file:../../../../Monads/docs/packages/starlight-theme-bogoware",
+    "@bogoware/starlight-theme": "^0.1.1",
     "astro": "^5.17.0"
   }
 }
