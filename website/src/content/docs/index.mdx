@@ -1,0 +1,134 @@
+---
+title: Bogoware.Localization
+description: Lightweight, FQDN-keyed localization for .NET
+template: splash
+hero:
+  title: Bogoware.Localization
+  tagline: Type-safe localization where each message is a class
+  image:
+    html: <img src="/Localization/hero-logo.svg" alt="Bogoware logo" style="width:280px;height:280px;filter:drop-shadow(0 0 40px rgba(99,102,241,0.4)) drop-shadow(0 0 80px rgba(139,92,246,0.2));" />
+  actions:
+    - text: Get Started
+      link: /Localization/getting-started/installation/
+      icon: right-arrow
+    - text: View on NuGet
+      link: https://www.nuget.org/packages/Bogoware.Localization
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+
+<p class="sl-text-lg" style="text-align:center;max-width:640px;margin:0 auto 0.5rem;">
+Define a class, and you've defined a message. The type name is the key, the properties are the placeholders — rename either and the compiler catches it.
+</p>
+
+<p style="text-align:center;margin-bottom:2rem;">
+<span style="display:inline-flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;">
+<a href="https://www.nuget.org/packages/Bogoware.Localization"><img src="https://img.shields.io/nuget/v/Bogoware.Localization?style=flat-square&color=6366f1&label=NuGet" alt="NuGet" /></a>
+<a href="https://www.nuget.org/packages/Bogoware.Localization"><img src="https://img.shields.io/nuget/dt/Bogoware.Localization?style=flat-square&color=8b5cf6&label=Downloads" alt="Downloads" /></a>
+<img src="https://img.shields.io/badge/.NET_8_%7C_10-512BD4?style=flat-square&logo=dotnet&logoColor=white" alt=".NET versions" />
+<a href="/Localization/changelog/"><img src="https://img.shields.io/badge/Changelog-94a3b8?style=flat-square" alt="Changelog" /></a>
+</span>
+</p>
+
+## Why?
+
+String-based localization keys are fragile. You pick `"errors.required_field"` by convention, match `{0}` placeholders by position, and maintain separate resource files that drift out of sync with every refactor.
+
+**Bogoware.Localization takes a different approach.** The fully-qualified type name becomes the lookup key. Properties become template placeholders. Rename either and the compiler catches it — no conventions to memorize, no resource files to keep aligned by hand. It's a well-established idea — *types as messages* — applied to localization.
+
+The library handles the rest: three-tier culture fallback, a four-step provider resolution chain, recursive nested formatting, and seamless ASP.NET Core integration — including automatic JSON response localization and ProblemDetails support.
+
+## Key Features
+
+<CardGrid>
+  <Card title="Class-Based Modeling" icon="pencil">
+    The type name is the key, properties are the placeholders. Rename either and the compiler catches it.
+  </Card>
+  <Card title="Culture Fallback" icon="translate">
+    Three-tier resolution: exact culture, parent culture, then invariant culture.
+  </Card>
+  <Card title="Provider Resolution Chain" icon="list-format">
+    Self-provider, DI provider, registry template, then fallback format — in that order, always.
+  </Card>
+  <Card title="Nested Localization" icon="random">
+    `ILocalizable` properties are formatted recursively through the full resolution chain.
+  </Card>
+  <Card title="JSON Templates" icon="document">
+    Load templates from embedded resources, files, or raw JSON strings. JSONC supported.
+  </Card>
+  <Card title="JSON Serialization" icon="setting">
+    Localize properties during System.Text.Json serialization automatically.
+  </Card>
+  <Card title="DI Integration" icon="puzzle">
+    `AddLocalization()` extension methods with additive, assembly-scanning registration.
+  </Card>
+  <Card title="ASP.NET Core" icon="rocket">
+    Per-request culture resolution, JSON response localization, and ProblemDetails support.
+  </Card>
+</CardGrid>
+
+## Quick Start
+
+<Steps>
+
+1. **Install from NuGet**
+
+   ```shell
+   dotnet add package Bogoware.Localization
+   ```
+
+2. **Define a localizable type**
+
+   ```csharp
+   using Bogoware.Localization;
+
+   public class RequiredFieldError(string fieldName) : ILocalizable
+   {
+       public string FieldName { get; } = fieldName;
+   }
+   ```
+
+3. **Create JSON templates** (embedded resources)
+
+   ```json
+   // localized-messages.en-US.json
+   { "MyApp.Errors.RequiredFieldError": "'{FieldName}' is required" }
+
+   // localized-messages.it-IT.json
+   { "MyApp.Errors.RequiredFieldError": "'{FieldName}' è obbligatorio" }
+   ```
+
+4. **Register and format**
+
+   ```csharp
+   services.AddLocalization(typeof(RequiredFieldError).Assembly);
+
+   var formatter = serviceProvider.GetRequiredService<ILocalizationFormatter>();
+   var message = formatter.Format(new RequiredFieldError("Email"));
+   // → "'Email' is required"     (en-US)
+   // → "'Email' è obbligatorio"  (it-IT)
+   ```
+
+</Steps>
+
+## Library Overview
+
+| Type | Purpose | Key Operations |
+|------|---------|----------------|
+| `ILocalizable` | Marker interface for localizable types | Implement on any class to make it localizable |
+| `ILocalizationFormatter` | Format localizable objects to strings | `Format(ILocalizable)` with culture support |
+| `ILocalizationRegistry` | Store and retrieve templates | `TryGetTemplate(type, culture)` with fallback |
+| `ILocalizationProvider<T>` | DI-based per-type providers | Register via `AddLocalization()` |
+| `JsonLocalizationRegistry` | JSON-backed template storage | Load from embedded resources, files, or strings |
+
+## Next Steps
+
+<CardGrid>
+  <LinkCard title="Installation Guide" description="Supported platforms, package setup, and first steps" href="/Localization/getting-started/installation/" />
+  <LinkCard title="Localizable Types" description="How to define types that carry their own localization" href="/Localization/concepts/localizable-types/" />
+  <LinkCard title="Provider Resolution Chain" description="The four-step resolution order explained" href="/Localization/concepts/provider-chain/" />
+  <LinkCard title="JSON Templates" description="Template syntax, JSONC support, and organization strategies" href="/Localization/guides/json-templates/" />
+  <LinkCard title="ASP.NET Core Integration" description="Per-request culture, JSON localization, and ProblemDetails" href="/Localization/guides/aspnetcore-integration/" />
+  <LinkCard title="API Reference" description="Complete type and method documentation" href="/Localization/api/" />
+</CardGrid>

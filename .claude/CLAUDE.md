@@ -22,7 +22,7 @@ Localization/
 ├── tests/Bogoware.Localization.Tests/      # Core xUnit unit tests
 ├── tests/Bogoware.Localization.AspNetCore.Tests/ # Integration tests (WebApplicationFactory)
 ├── samples/Bogoware.Localization.Sample.Api/     # Sample Minimal API (also integration test host)
-├── docs/                                   # Docusaurus 3.9.2 documentation site
+├── website/                                # Astro/Starlight documentation site
 ├── scripts/                                # generate-api-docs.sh, sync-readme.js
 ├── .github/workflows/                      # build.yml, publish.yml, docs.yml
 ├── Directory.Build.props                   # Multi-target, nullable, implicit usings, XML docs
@@ -69,8 +69,11 @@ Localization/
 - Feature branches: `feat/*`, `fix/*`, `refactor/*`
 - **`build.yml`**: CI on push/PR to `rel/*` — restore → build → test (both TFMs)
 - **`publish.yml`**: On `v*` tag or GitHub Release — build → test → pack → Meziantou validate → NuGet push (pwsh shell, version from git tag)
-- **`docs.yml`**: On `rel/prod` push, release, or manual — .NET build → xmldoc2md (net8.0 DLL only) → changelog sync → Docusaurus build → GitHub Pages deploy
-- Docs site: `https://bogoware.github.io/Localization/` — API docs auto-generated, `CHANGELOG.md` synced via `scripts/sync-readme.js`
+- **`docs.yml`**: On `rel/prod` push, release, or manual — .NET build → xmldoc2md (net8.0 DLL only) → changelog sync → Astro/Starlight build → GitHub Pages deploy
+- Docs site: `https://bogoware.github.io/Localization/` — uses `@bogoware/starlight-theme` (architect mode)
+- Docs build: `cd website && pnpm install && pnpm build`
+- API docs auto-generated to `website/src/content/docs/api/`
+- Starlight frontmatter uses `sidebar: { order: N }` (not Docusaurus `sidebar_position`)
 - Docs must build cleanly on every `rel/prod` push — broken docs block the site
 
 ## Post-Task Review

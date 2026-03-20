@@ -13,6 +13,7 @@
     <RepositoryUrl>https://github.com/Bogoware/Localization</RepositoryUrl>
     <PackageTags>localization;i18n;l10n;formatting;dotnet</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>nuget-icon.png</PackageIcon>
     <!-- CS8602: suppressed in generated LoggerMessage code (nullable ILogger? parameter) -->
     <NoWarn>$(NoWarn);CS8602</NoWarn>
   </PropertyGroup>
@@ -22,5 +23,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../assets/nuget-icon.png" Pack="true" PackagePath="/" />
   </ItemGroup>
 </Project>
