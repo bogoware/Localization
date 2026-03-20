@@ -25,7 +25,7 @@ export default defineConfig({
         github: 'https://github.com/bogoware/Localization',
       },
       editLink: {
-        baseUrl: 'https://github.com/bogoware/Localization/tree/rel/prod/docs/sites/localization/',
+        baseUrl: 'https://github.com/bogoware/Localization/tree/rel/prod/website/',
       },
       sidebar: [
         { label: 'Introduction', slug: '' },
