@@ -23,6 +23,7 @@ export default defineConfig({
             defaultDescription: 'Lightweight, FQDN-keyed localization for .NET',
             structuredData: { type: 'SoftwareSourceCode', author: 'Bogoware' },
           },
+          analytics: { googleAnalyticsId: 'G-G2ZJF2ZYY3' },
         }),
       ],
       social: {
