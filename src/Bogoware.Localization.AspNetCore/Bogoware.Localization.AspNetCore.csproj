@@ -9,7 +9,7 @@
     <Authors>Bogoware</Authors>
     <Description>ASP.NET Core integration for Bogoware.Localization — automatic per-request culture resolution and localized JSON serialization.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/Bogoware/Localization</PackageProjectUrl>
+    <PackageProjectUrl>https://bogoware.github.io/Localization/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Bogoware/Localization</RepositoryUrl>
     <PackageTags>localization;i18n;l10n;aspnetcore;formatting;dotnet</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

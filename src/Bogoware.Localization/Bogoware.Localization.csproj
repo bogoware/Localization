@@ -9,7 +9,7 @@
     <Authors>Bogoware</Authors>
     <Description>Lightweight, FQDN-keyed localization library for .NET with DI support, culture fallback chains, and pluggable providers.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/Bogoware/Localization</PackageProjectUrl>
+    <PackageProjectUrl>https://bogoware.github.io/Localization/</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Bogoware/Localization</RepositoryUrl>
     <PackageTags>localization;i18n;l10n;formatting;dotnet</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
