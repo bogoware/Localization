@@ -16,7 +16,7 @@ hero:
       variant: minimal
 ---
 
-import { CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
 
 _A .NET localization library where **each message is a class** — its name is the key, its properties are the placeholders._
 
@@ -90,14 +90,30 @@ dotnet add package Bogoware.Localization
 ## Key Features
 
 <CardGrid>
-  <LinkCard title="Localizable Types" description="The type name is the key, properties are the placeholders." href="/Localization/concepts/localizable-types/" />
-  <LinkCard title="Culture Fallback" description="Exact culture → parent culture → invariant culture." href="/Localization/concepts/culture-fallback/" />
-  <LinkCard title="Provider Resolution Chain" description="Self-provider, DI provider, registry template, then fallback format." href="/Localization/concepts/provider-chain/" />
-  <LinkCard title="Nested Localization" description="ILocalizable properties are formatted recursively through the full chain." href="/Localization/guides/nested-localization/" />
-  <LinkCard title="JSON Templates" description="Load templates from embedded resources, files, or raw JSON strings." href="/Localization/guides/json-templates/" />
-  <LinkCard title="JSON Serialization" description="Localize properties during serialization automatically." href="/Localization/guides/json-serialization/" />
-  <LinkCard title="Custom Providers" description="ILocalizationProvider for self-providing and DI-based localization." href="/Localization/guides/custom-providers/" />
-  <LinkCard title="ASP.NET Core Integration" description="Per-request culture, JSON response localization, and ProblemDetails support." href="/Localization/guides/aspnetcore-integration/" />
+  <Card title="Class-Based Modeling" icon="pencil">
+    The type name is the key, properties are the placeholders. Rename either and the compiler catches it.
+  </Card>
+  <Card title="Culture Fallback" icon="translate">
+    Three-tier resolution: exact culture, parent culture, then invariant culture.
+  </Card>
+  <Card title="Provider Resolution Chain" icon="list-format">
+    Self-provider, DI provider, registry template, then fallback format — in that order, always.
+  </Card>
+  <Card title="Nested Localization" icon="random">
+    `ILocalizable` properties are formatted recursively through the full resolution chain.
+  </Card>
+  <Card title="JSON Templates" icon="document">
+    Load templates from embedded resources, files, or raw JSON strings. JSONC supported.
+  </Card>
+  <Card title="JSON Serialization" icon="setting">
+    Localize properties during System.Text.Json serialization automatically.
+  </Card>
+  <Card title="DI Integration" icon="puzzle">
+    `AddLocalization()` extension methods with additive, assembly-scanning registration.
+  </Card>
+  <Card title="ASP.NET Core" icon="rocket">
+    Per-request culture resolution, JSON response localization, and ProblemDetails support.
+  </Card>
 </CardGrid>
 
 ## Next Steps
